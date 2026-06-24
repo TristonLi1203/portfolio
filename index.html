@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triston Li · 李天天</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --ink: #0a0a0a;
+      --ink-mid: #555555;
+      --ink-light: #aaaaaa;
+      --border: rgba(0,0,0,0.08);
+      --serif: 'Noto Sans SC', sans-serif;
+      --sans: 'Noto Sans SC', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 48px;
+      height: 64px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-center {
+      display: flex; gap: 36px;
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-center a {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-mid);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-center a:hover { color: var(--ink); }
+    .lang-switcher {
+      display: flex; gap: 0; align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .lang-btn {
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      padding: 5px 10px;
+      cursor: pointer;
+      color: var(--ink-light);
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      transition: all 0.15s;
+      font-family: var(--sans);
+    }
+    .lang-btn:last-child { border-right: none; }
+    .lang-btn:hover { color: var(--ink); background: rgba(0,0,0,0.03); }
+    .lang-btn.active { color: var(--ink); background: var(--ink); color: white; }
+
+    /* ── HAMBURGER ── */
+    .nav-right {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hamburger-btn {
+      width: 36px; height: 36px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+      cursor: pointer; background: none; border: none; padding: 4px;
+    }
+    .hamburger-btn span {
+      display: block; width: 20px; height: 1.5px;
+      background: var(--ink);
+      transition: all 0.25s;
+      transform-origin: center;
+    }
+    .hamburger-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+    .hamburger-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .hamburger-menu {
+      position: fixed; top: 64px; right: 0;
+      width: 220px;
+      background: white;
+      border-left: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: none;
+      z-index: 199;
+    }
+    .hamburger-menu.open { display: block; }
+    .hamburger-menu a {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .hamburger-menu a:last-child { border-bottom: none; }
+    .hamburger-menu a:hover { background: rgba(0,0,0,0.02); }
+    .hamburger-menu a span.arrow { color: var(--ink-light); font-size: 14px; }
+
+    /* ── HERO BLÆD STYLE ── */
+    .hero-blæd {
+      padding-top: 64px;
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-left {
+      padding: 80px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--border);
+    }
+
+    .hero-headline h1 {
+      font-family: var(--serif);
+      font-size: clamp(52px, 7vw, 96px);
+      font-weight: 400;
+      line-height: 1.1;
+      margin: 0;
+      color: var(--ink);
+    }
+
+    .hero-subtitle {
+      max-width: 380px;
+      margin-top: 48px;
+    }
+
+    .hero-subtitle p {
+      font-size: 15px;
+      color: var(--ink-mid);
+      line-height: 1.8;
+      font-weight: 300;
+      margin: 0;
+    }
+
+    .hero-scroll {
+      margin-top: auto;
+    }
+
+    .scroll-indicator {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      display: inline-block;
+    }
+
+    .hero-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      background: var(--bg);
+    }
+
+    .hero-image-large {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-image-large video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Bottom navigation bar */
+    .hero-bottom-nav {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      padding: 20px 40px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      border-right: 1px solid var(--border);
+      transition: background 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+
+    .bottom-nav-item:last-child {
+      border-right: none;
+    }
+
+    .bottom-nav-item:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      height: 1px; background: var(--border); margin: 0;
+    }
+
+    /* ── BRANDS ── */
+    .brands-section { padding: 64px 48px; }
+    .brands-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .brands-track {
+      display: flex;
+      gap: 0;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-item {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 28px 20px;
+      border-right: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .brand-item:last-child { border-right: none; }
+    .brand-item:hover { background: rgba(0,0,0,0.02); }
+    .brand-placeholder {
+      height: 28px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-placeholder span {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      font-weight: 500;
+    }
+
+    /* ── WORK ── */
+    .work-section { padding: 80px 48px; }
+    .work-header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 56px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .work-title {
+      font-family: var(--serif);
+      font-size: 40px;
+      font-weight: 400;
+    }
+    .work-subtitle {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+
+    /* Category tabs */
+    .cat-tabs {
+      display: flex; gap: 0;
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-tab {
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      padding: 12px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s;
+      background: none; border-top: none; border-left: none; border-right: none;
+      font-family: var(--sans);
+    }
+    .cat-tab:hover { color: var(--ink); }
+    .cat-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+    .cat-panel { display: none; }
+    .cat-panel.active { display: block; }
+
+    /* Asymmetric grid */
+    .asym-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2px;
+    }
+    .ag-full { grid-column: span 12; }
+    .ag-7 { grid-column: span 7; }
+    .ag-5 { grid-column: span 5; }
+    .ag-8 { grid-column: span 8; }
+    .ag-4 { grid-column: span 4; }
+    .ag-6 { grid-column: span 6; }
+    .ag-3 { grid-column: span 3; }
+
+    .work-item {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: #f5f5f5;
+    }
+    .work-item-inner {
+      position: relative;
+      width: 100%;
+      padding-bottom: 62%;
+      overflow: hidden;
+    }
+    .ag-7 .work-item-inner { padding-bottom: 68%; }
+    .ag-5 .work-item-inner { padding-bottom: 75%; }
+    .ag-full .work-item-inner { padding-bottom: 45%; }
+
+    .work-thumb {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .work-item:hover .work-thumb { transform: scale(1.04); }
+
+    .thumb-fill {
+      position: absolute; inset: 0;
+      transition: transform 0.5s ease;
+    }
+    .work-item:hover .thumb-fill { transform: scale(1.04); }
+
+    .work-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      display: flex; align-items: flex-end;
+      padding: 20px;
+    }
+    .work-item:hover .work-overlay { opacity: 1; }
+    .overlay-play {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .overlay-play svg { margin-left: 2px; }
+
+    .work-info { padding: 16px 0 8px; }
+    .work-info-badge {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 4px;
+    }
+    .work-info-title {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .work-info-meta {
+      font-size: 12px;
+      color: var(--ink-light);
+    }
+
+    .row-gap { margin-bottom: 2px; }
+
+    /* ── ABOUT ── */
+    .about-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--border);
+    }
+    .about-left {
+      padding: 80px 48px;
+      border-right: 1px solid var(--border);
+    }
+    .about-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 32px;
+    }
+    .about-headline {
+      font-family: var(--serif);
+      font-size: clamp(32px, 3.5vw, 52px);
+      font-weight: 400;
+      line-height: 1.1;
+      margin-bottom: 32px;
+    }
+    .about-headline em { font-style: italic; color: var(--ink-mid); }
+    .about-body {
+      font-size: 15px;
+      color: var(--ink-mid);
+      line-height: 1.85;
+      font-weight: 300;
+      max-width: 420px;
+    }
+    .about-right {
+      padding: 80px 48px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .about-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+      margin-bottom: 48px;
+    }
+    .stat-block {}
+    .stat-number {
+      font-family: var(--serif);
+      font-size: 48px;
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-desc {
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+    .skills-block {}
+    .skills-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 16px;
+    }
+    .skills-list {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .skill-tag {
+      font-size: 12px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      color: var(--ink-mid);
+    }
+
+    /* ── CONTACT ── */
+    .contact-section {
+      background: var(--ink);
+      padding: 80px 48px;
+    }
+    .contact-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 64px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .contact-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 20px;
+    }
+    .contact-headline {
+      font-family: var(--serif);
+      font-size: clamp(40px, 5vw, 72px);
+      color: white;
+      font-weight: 400;
+      line-height: 1.05;
+    }
+    .contact-headline em { font-style: italic; color: rgba(255,255,255,0.4); }
+    .contact-links {
+      display: flex; flex-direction: column; gap: 0;
+      min-width: 280px;
+    }
+    .contact-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .contact-row:first-child { border-top: 1px solid rgba(255,255,255,0.08); }
+    .contact-row:hover { opacity: 0.6; }
+    .contact-platform {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      width: 72px;
+    }
+    .contact-value {
+      font-size: 14px;
+      color: rgba(255,255,255,0.8);
+    }
+    .contact-arrow { color: rgba(255,255,255,0.2); font-size: 16px; }
+
+    footer {
+      background: var(--ink);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 20px 48px;
+      display: flex; justify-content: space-between;
+    }
+    footer span { font-size: 11px; color: rgba(255,255,255,0.18); letter-spacing: 0.04em; }
+
+    /* ── LANG HIDDEN ── */
+    [data-lang] { display: none; }
+    .lang-zh-hans [data-lang="zh-hans"] { display: block; }
+    .lang-zh-hant [data-lang="zh-hant"] { display: block; }
+    .lang-en [data-lang="en"] { display: block; }
+    span[data-lang], a[data-lang] { display: inline; }
+    .lang-zh-hans span[data-lang]:not([data-lang="zh-hans"]) { display: none; }
+    .lang-zh-hant span[data-lang]:not([data-lang="zh-hant"]) { display: none; }
+    .lang-en span[data-lang]:not([data-lang="en"]) { display: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 0 20px; }
+      .nav-center { display: none; }
+      .hero-content { grid-template-columns: 1fr; }
+      .hero-left { padding: 48px 24px; border-right: none; }
+      .hero-headline h1 { font-size: clamp(40px, 10vw, 72px); }
+      .hero-subtitle { margin-top: 32px; }
+      .hero-subtitle p { font-size: 14px; }
+      .hero-right { padding: 40px 24px; min-height: 300px; }
+      .hero-bottom-nav { flex-wrap: wrap; }
+      .bottom-nav-item { flex: 1; min-width: 50%; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .bottom-nav-item:nth-child(even) { border-right: none; }
+      .bottom-nav-item:nth-child(n+2) { border-bottom: none; }
+      .brands-section, .work-section, .about-left, .about-right { padding: 48px 20px; }
+      .about-section { grid-template-columns: 1fr; }
+      .about-left { border-right: none; border-bottom: 1px solid var(--border); }
+      .ag-7, .ag-5, .ag-8, .ag-4, .ag-6, .ag-3 { grid-column: span 12; }
+      .contact-section { padding: 48px 20px; }
+      .contact-top { flex-direction: column; gap: 40px; }
+      footer { padding: 20px; }
+    }
+  </style>
+</head>
+<body class="lang-zh-hans">
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Triston Li</a>
+  <div class="nav-center">
+    <a href="#brands">
+      <span data-lang="zh-hans">品牌</span>
+      <span data-lang="zh-hant">品牌</span>
+      <span data-lang="en">Brands</span>
+    </a>
+    <a href="#work">
+      <span data-lang="zh-hans">作品</span>
+      <span data-lang="zh-hant">作品</span>
+      <span data-lang="en">Work</span>
+    </a>
+    <a href="#about">
+      <span data-lang="zh-hans">关于</span>
+      <span data-lang="zh-hant">關於</span>
+      <span data-lang="en">About</span>
+    </a>
+    <a href="#contact">
+      <span data-lang="zh-hans">联系</span>
+      <span data-lang="zh-hant">聯絡</span>
+      <span data-lang="en">Contact</span>
+    </a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('zh-hans')">简</button>
+      <button class="lang-btn" onclick="setLang('zh-hant')">繁</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="hamburger-menu" id="hamburgerMenu">
+  <a href="#brands" onclick="closeMenu()">
+    <span data-lang="zh-hans">合作品牌</span>
+    <span data-lang="zh-hant">合作品牌</span>
+    <span data-lang="en">Brands</span>
+    <span class="arrow">↗</span>
+  </a>
+  <a href="#work" onclick="closeMenu()">
+    <span data-lang="zh-hans">作品案例</span>
+    <span data-lang="zh-hant">作品案例</span>
+    <span data-lang="en">Work</span>
+    <span class="arrow">↗</span>
+  </a>
+  <a href="#contact" onclick="closeMenu()">
+    <span data-lang="zh-hans">联系方式</span>
+    <span data-lang="zh-hant">聯絡方式</span>
+    <span data-lang="en">Contact</span>
+    <span class="arrow">↗</span>
+  </a>
+</div>
+
+<!-- HERO -->
+<section class="hero-blæd">
+  <div class="hero-content">
+    <div class="hero-left">
+      <!-- Large headline -->
+      <div class="hero-headline">
+        <h1 data-lang="zh-hans">剪辑不只是<br>技术</h1>
+      </div>
+      
+      <!-- Subtitle with context -->
+      <div class="hero-subtitle">
+        <p data-lang="zh-hans">自由视频剪辑师，专注品牌视频、时尚大片、新媒体内容</p>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="hero-scroll">
+        <span class="scroll-indicator" data-lang="zh-hans">向下滚动</span>
+      </div>
+    </div>
+
+    <!-- Right side - Image -->
+    <div class="hero-right">
+      <div class="hero-image-large">
+        <video autoplay loop muted playsinline>
+          <source src="marquee.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- BRANDS -->
+<section class="brands-section" id="brands">
+  <p class="brands-label">
+    <span data-lang="zh-hans">合作品牌</span>
+    <span data-lang="zh-hant">合作品牌</span>
+    <span data-lang="en">Selected Clients</span>
+  </p>
+  <div class="brands-track">
+    <div class="brand-item">
+      <div class="brand-placeholder"><span>Brand A</span></div>
+    </div>
+    <div class="brand-item">
+      <div class="brand-placeholder"><span>Brand B</span></div>
+    </div>
+    <div class="brand-item">
+      <div class="brand-placeholder"><span>Brand C</span></div>
+    </div>
+    <div class="brand-item">
+      <div class="brand-placeholder"><span>Brand D</span></div>
+    </div>
+    <div class="brand-item">
+      <div class="brand-placeholder"><span>Brand E</span></div>
+    </div>
+    <div class="brand-item">
+      <div class="brand-placeholder"><span>Brand F</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- WORK -->
+<section class="work-section" id="work">
+  <div class="work-header">
+    <h2 class="work-title">
+      <span data-lang="zh-hans">作品</span>
+      <span data-lang="zh-hant">作品</span>
+      <span data-lang="en">Work</span>
+    </h2>
+    <span class="work-subtitle">Selected Works</span>
+  </div>
+
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="setTab(this,'all')">
+      <span data-lang="zh-hans">全部</span>
+      <span data-lang="zh-hant">全部</span>
+      <span data-lang="en">All</span>
+    </button>
+    <button class="cat-tab" onclick="setTab(this,'fashion')">
+      <span data-lang="zh-hans">时尚</span>
+      <span data-lang="zh-hant">時尚</span>
+      <span data-lang="en">Fashion</span>
+    </button>
+    <button class="cat-tab" onclick="setTab(this,'sport')">
+      <span data-lang="zh-hans">运动</span>
+      <span data-lang="zh-hant">運動</span>
+      <span data-lang="en">Sport</span>
+    </button>
+    <button class="cat-tab" onclick="setTab(this,'digital')">
+      <span data-lang="zh-hans">新媒体</span>
+      <span data-lang="zh-hant">新媒體</span>
+      <span data-lang="en">Digital</span>
+    </button>
+    <button class="cat-tab" onclick="setTab(this,'doc')">
+      <span data-lang="zh-hans">纪录片</span>
+      <span data-lang="zh-hant">紀錄片</span>
+      <span data-lang="en">Documentary</span>
+    </button>
+  </div>
+
+  <!-- ALL panel -->
+  <div class="cat-panel active" id="panel-all">
+    <div class="asym-grid row-gap">
+      <div class="ag-7">
+        <div class="work-item">
+          <div class="work-item-inner">
+            <div class="thumb-fill" style="background: #E2DDD6;"></div>
+            <div class="work-overlay">
+              <div class="overlay-play">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="work-info-badge">
+              <span data-lang="zh-hans">时尚 · TVC</span>
+              <span data-lang="zh-hant">時尚 · TVC</span>
+              <span data-lang="en">Fashion · TVC</span>
+            </p>
+            <p class="work-info-title">
+              <span data-lang="zh-hans">某时尚品牌春季形象片</span>
+              <span data-lang="zh-hant">某時尚品牌春季形象片</span>
+              <span data-lang="en">Fashion Brand Spring Campaign</span>
+            </p>
+            <p class="work-info-meta">2024 · 2'30"</p>
+          </div>
+        </div>
+      </div>
+      <div class="ag-5">
+        <div class="work-item">
+          <div class="work-item-inner">
+            <div class="thumb-fill" style="background: #D8DCE0;"></div>
+            <div class="work-overlay">
+              <div class="overlay-play">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="work-info-badge">
+              <span data-lang="zh-hans">运动 · 品牌片</span>
+              <span data-lang="zh-hant">運動 · 品牌片</span>
+              <span data-lang="en">Sport · Brand Film</span>
+            </p>
+            <p class="work-info-title">
+              <span data-lang="zh-hans">运动品牌产品宣传片</span>
+              <span data-lang="zh-hant">運動品牌產品宣傳片</span>
+              <span data-lang="en">Sportswear Brand Product Film</span>
+            </p>
+            <p class="work-info-meta">2024 · 1'45"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="asym-grid row-gap">
+      <div class="ag-4">
+        <div class="work-item">
+          <div class="work-item-inner">
+            <div class="thumb-fill" style="background: #DDE0DC;"></div>
+            <div class="work-overlay">
+              <div class="overlay-play">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="work-info-badge">
+              <span data-lang="zh-hans">新媒体 · 小红书</span>
+              <span data-lang="zh-hant">新媒體 · 小紅書</span>
+              <span data-lang="en">Digital · Xiaohongshu</span>
+            </p>
+            <p class="work-info-title">
+              <span data-lang="zh-hans">品牌系列短视频</span>
+              <span data-lang="zh-hant">品牌系列短視頻</span>
+              <span data-lang="en">Brand Short-form Series</span>
+            </p>
+            <p class="work-info-meta">2024</p>
+          </div>
+        </div>
+      </div>
+      <div class="ag-4">
+        <div class="work-item">
+          <div class="work-item-inner">
+            <div class="thumb-fill" style="background: #E0DDD9;"></div>
+            <div class="work-overlay">
+              <div class="overlay-play">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="work-info-badge">
+              <span data-lang="zh-hans">纪录片 · 人物</span>
+              <span data-lang="zh-hant">紀錄片 · 人物</span>
+              <span data-lang="en">Documentary · Portrait</span>
+            </p>
+            <p class="work-info-title">
+              <span data-lang="zh-hans">人物纪录短片</span>
+              <span data-lang="zh-hant">人物紀錄短片</span>
+              <span data-lang="en">Portrait Documentary</span>
+            </p>
+            <p class="work-info-meta">2023 · 12'00"</p>
+          </div>
+        </div>
+      </div>
+      <div class="ag-4">
+        <div class="work-item">
+          <div class="work-item-inner">
+            <div class="thumb-fill" style="background: #DCDCE0;"></div>
+            <div class="work-overlay">
+              <div class="overlay-play">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="work-info-badge">
+              <span data-lang="zh-hans">活动 · 现场</span>
+              <span data-lang="zh-hant">活動 · 現場</span>
+              <span data-lang="en">Event · Live</span>
+            </p>
+            <p class="work-info-title">
+              <span data-lang="zh-hans">品牌发布活动现场剪辑</span>
+              <span data-lang="zh-hant">品牌發佈活動現場剪輯</span>
+              <span data-lang="en">Brand Launch Event Edit</span>
+            </p>
+            <p class="work-info-meta">2023</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="asym-grid">
+      <div class="ag-full">
+        <div class="work-item">
+          <div class="work-item-inner">
+            <div class="thumb-fill" style="background: #E8E4E0;"></div>
+            <div class="work-overlay">
+              <div class="overlay-play">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="work-info-badge">
+              <span data-lang="zh-hans">时尚 · 品牌故事</span>
+              <span data-lang="zh-hant">時尚 · 品牌故事</span>
+              <span data-lang="en">Fashion · Brand Story</span>
+            </p>
+            <p class="work-info-title">
+              <span data-lang="zh-hans">品牌周年故事片</span>
+              <span data-lang="zh-hant">品牌週年故事片</span>
+              <span data-lang="en">Brand Anniversary Film</span>
+            </p>
+            <p class="work-info-meta">2023 · 5'00"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other panels (simplified, same structure) -->
+  <div class="cat-panel" id="panel-fashion">
+    <div class="asym-grid">
+      <div class="ag-7">
+        <div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#E2DDD6;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div>
+          <div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">时尚 · TVC</span><span data-lang="zh-hant">時尚 · TVC</span><span data-lang="en">Fashion · TVC</span></p><p class="work-info-title"><span data-lang="zh-hans">春季形象片</span><span data-lang="zh-hant">春季形象片</span><span data-lang="en">Spring Campaign</span></p><p class="work-info-meta">2024</p></div>
+        </div>
+      </div>
+      <div class="ag-5">
+        <div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#E8E4E0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div>
+          <div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">时尚 · 品牌故事</span><span data-lang="zh-hant">時尚 · 品牌故事</span><span data-lang="en">Fashion · Story</span></p><p class="work-info-title"><span data-lang="zh-hans">品牌周年故事片</span><span data-lang="zh-hant">品牌週年故事片</span><span data-lang="en">Anniversary Film</span></p><p class="work-info-meta">2023</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-panel" id="panel-sport">
+    <div class="asym-grid">
+      <div class="ag-full">
+        <div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#D8DCE0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div>
+          <div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">运动 · 品牌片</span><span data-lang="zh-hant">運動 · 品牌片</span><span data-lang="en">Sport · Brand Film</span></p><p class="work-info-title"><span data-lang="zh-hans">运动品牌宣传片</span><span data-lang="zh-hant">運動品牌宣傳片</span><span data-lang="en">Sportswear Brand Film</span></p><p class="work-info-meta">2024</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-panel" id="panel-digital">
+    <div class="asym-grid">
+      <div class="ag-6">
+        <div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#DDE0DC;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div>
+          <div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">新媒体 · 小红书</span><span data-lang="zh-hant">新媒體 · 小紅書</span><span data-lang="en">Digital · Xiaohongshu</span></p><p class="work-info-title"><span data-lang="zh-hans">品牌系列短视频</span><span data-lang="zh-hant">品牌系列短視頻</span><span data-lang="en">Brand Series</span></p><p class="work-info-meta">2024</p></div>
+        </div>
+      </div>
+      <div class="ag-6">
+        <div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#DCDCE0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div>
+          <div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">新媒体 · 抖音</span><span data-lang="zh-hant">新媒體 · 抖音</span><span data-lang="en">Digital · Douyin</span></p><p class="work-info-title"><span data-lang="zh-hans">抖音品牌植入短片</span><span data-lang="zh-hant">抖音品牌植入短片</span><span data-lang="en">Douyin Brand Integration</span></p><p class="work-info-meta">2024</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-panel" id="panel-doc">
+    <div class="asym-grid">
+      <div class="ag-8">
+        <div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#E0DDD9;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div>
+          <div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">纪录片 · 人物</span><span data-lang="zh-hant">紀錄片 · 人物</span><span data-lang="en">Documentary · Portrait</span></p><p class="work-info-title"><span data-lang="zh-hans">人物纪录短片</span><span data-lang="zh-hant">人物紀錄短片</span><span data-lang="en">Portrait Documentary</span></p><p class="work-info-meta">2023 · 12'00"</p></div>
+        </div>
+      </div>
+      <div class="ag-4">
+        <div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#DCDCE0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div>
+          <div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">采访 · 人物</span><span data-lang="zh-hant">採訪 · 人物</span><span data-lang="en">Interview · Portrait</span></p><p class="work-info-title"><span data-lang="zh-hans">品牌创始人专访</span><span data-lang="zh-hant">品牌創始人專訪</span><span data-lang="en">Founder Interview</span></p><p class="work-info-meta">2022</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<div class="about-section" id="about">
+  <div class="about-left">
+    <p class="about-label">
+      <span data-lang="zh-hans">关于</span>
+      <span data-lang="zh-hant">關於</span>
+      <span data-lang="en">About</span>
+    </p>
+    <h2 class="about-headline">
+      <span data-lang="zh-hans">剪辑不只是<br>技术，<em>是判断力。</em></span>
+      <span data-lang="zh-hant">剪輯不只是<br>技術，<em>是判斷力。</em></span>
+      <span data-lang="en">Editing isn't just<br>technique, <em>it's judgment.</em></span>
+    </h2>
+    <p class="about-body">
+      <span data-lang="zh-hans">自由剪辑师，4年行业经验，曾就职于乙方制作公司，现独立接单。专注品牌视频内容，擅长在节奏与情绪之间找到准确的落点。相信好的剪辑是帮助一段素材找到它本该有的重量。</span>
+      <span data-lang="zh-hant">自由剪輯師，4年行業經驗，曾任職於乙方製作公司，現獨立接案。專注品牌視頻內容，擅長在節奏與情緒之間找到準確的落點。相信好的剪輯是幫助一段素材找到它本該有的重量。</span>
+      <span data-lang="en">Freelance video editor with 4 years of experience, formerly at a production agency, now working independently with direct clients. Focused on brand video content, with a strong sense for pacing and emotional rhythm.</span>
+    </p>
+  </div>
+  <div class="about-right">
+    <div class="about-stats">
+      <div class="stat-block">
+        <div class="stat-number">4+</div>
+        <div class="stat-desc">
+          <span data-lang="zh-hans">年经验</span>
+          <span data-lang="zh-hant">年經驗</span>
+          <span data-lang="en">Years</span>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number">30+</div>
+        <div class="stat-desc">
+          <span data-lang="zh-hans">完成项目</span>
+          <span data-lang="zh-hant">完成項目</span>
+          <span data-lang="en">Projects</span>
+        </div>
+      </div>
+    </div>
+    <div class="skills-block">
+      <p class="skills-label">
+        <span data-lang="zh-hans">工具</span>
+        <span data-lang="zh-hant">工具</span>
+        <span data-lang="en">Tools</span>
+      </p>
+      <div class="skills-list">
+        <span class="skill-tag">Final Cut Pro</span>
+        <span class="skill-tag">After Effects</span>
+        <span class="skill-tag">DaVinci Resolve</span>
+        <span class="skill-tag">Premiere Pro</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="contact-top">
+    <div>
+      <p class="contact-eyebrow">
+        <span data-lang="zh-hans">联系我</span>
+        <span data-lang="zh-hant">聯絡我</span>
+        <span data-lang="en">Get In Touch</span>
+      </p>
+      <h2 class="contact-headline">
+        <span data-lang="zh-hans">有项目想聊？<br><em>随时欢迎。</em></span>
+        <span data-lang="zh-hant">有項目想聊？<br><em>隨時歡迎。</em></span>
+        <span data-lang="en">Have a project?<br><em>Let's talk.</em></span>
+      </h2>
+    </div>
+    <div class="contact-links">
+      <a href="#" class="contact-row">
+        <span class="contact-platform">
+          <span data-lang="zh-hans">微信</span>
+          <span data-lang="zh-hant">微信</span>
+          <span data-lang="en">WeChat</span>
+        </span>
+        <span class="contact-value">your_wechat_id</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="mailto:your@email.com" class="contact-row">
+        <span class="contact-platform">
+          <span data-lang="zh-hans">邮箱</span>
+          <span data-lang="zh-hant">電郵</span>
+          <span data-lang="en">Email</span>
+        </span>
+        <span class="contact-value">your@email.com</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="#" class="contact-row">
+        <span class="contact-platform">
+          <span data-lang="zh-hans">小红书</span>
+          <span data-lang="zh-hant">小紅書</span>
+          <span data-lang="en">RED</span>
+        </span>
+        <span class="contact-value">@yourhandle</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="#" class="contact-row">
+        <span class="contact-platform">Instagram</span>
+        <span class="contact-value">@yourhandle</span>
+        <span class="contact-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2024 Triston Li · 李天天</span>
+  <span>
+    <span data-lang="zh-hans">视频剪辑师</span>
+    <span data-lang="zh-hant">視頻剪輯師</span>
+    <span data-lang="en">Video Editor</span>
+  </span>
+</footer>
+
+<script>
+  function toggleMenu() {
+    const btn = document.getElementById('hamburgerBtn');
+    const menu = document.getElementById('hamburgerMenu');
+    btn.classList.toggle('open');
+    menu.classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('hamburgerBtn').classList.remove('open');
+    document.getElementById('hamburgerMenu').classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#hamburgerMenu')) closeMenu();
+  });
+
+  function setLang(lang) {
+    document.body.className = 'lang-' + lang;
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    document.documentElement.lang = lang === 'zh-hans' ? 'zh-Hans' : lang === 'zh-hant' ? 'zh-Hant' : 'en';
+  }
+
+  function setTab(el, panel) {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.cat-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + panel).classList.add('active');
+  }
+</script>
+</body>
+</html>
