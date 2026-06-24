@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Triston Li · 李天天</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,8 +15,8 @@
       --ink-mid: #555555;
       --ink-light: #aaaaaa;
       --border: rgba(0,0,0,0.08);
-      --serif: 'Noto Sans SC', sans-serif;
-      --sans: 'Noto Sans SC', sans-serif;
+      --serif: 'DM Serif Display', 'Noto Serif SC', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
     }
 
     html { scroll-behavior: smooth; }
@@ -83,50 +83,6 @@
     .lang-btn:last-child { border-right: none; }
     .lang-btn:hover { color: var(--ink); background: rgba(0,0,0,0.03); }
     .lang-btn.active { color: var(--ink); background: var(--ink); color: white; }
-
-    /* ── HAMBURGER ── */
-    .nav-right {
-      display: flex; align-items: center; gap: 12px;
-    }
-    .hamburger-btn {
-      width: 36px; height: 36px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-      cursor: pointer; background: none; border: none; padding: 4px;
-    }
-    .hamburger-btn span {
-      display: block; width: 20px; height: 1.5px;
-      background: var(--ink);
-      transition: all 0.25s;
-      transform-origin: center;
-    }
-    .hamburger-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-    .hamburger-btn.open span:nth-child(2) { opacity: 0; }
-    .hamburger-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-
-    .hamburger-menu {
-      position: fixed; top: 64px; right: 0;
-      width: 220px;
-      background: white;
-      border-left: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      display: none;
-      z-index: 199;
-    }
-    .hamburger-menu.open { display: block; }
-    .hamburger-menu a {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 24px;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--ink);
-      text-decoration: none;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-    .hamburger-menu a:last-child { border-bottom: none; }
-    .hamburger-menu a:hover { background: rgba(0,0,0,0.02); }
-    .hamburger-menu a span.arrow { color: var(--ink-light); font-size: 14px; }
 
     /* ── HERO BLÆD STYLE ── */
     .hero-blæd {
@@ -199,20 +155,15 @@
       width: 100%;
       height: 100%;
       min-height: 400px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .image-placeholder-large {
+    .hero-image-large video {
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #f5f5f5 0%, #efefef 100%);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: rgba(0, 0, 0, 0.15);
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      object-fit: cover;
+      display: block;
     }
 
     /* Bottom navigation bar */
@@ -607,38 +558,12 @@
       <span data-lang="en">Contact</span>
     </a>
   </div>
-  <div class="nav-right">
-    <div class="lang-switcher">
-      <button class="lang-btn active" onclick="setLang('zh-hans')">简</button>
-      <button class="lang-btn" onclick="setLang('zh-hant')">繁</button>
-      <button class="lang-btn" onclick="setLang('en')">EN</button>
-    </div>
-    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
-      <span></span><span></span><span></span>
-    </button>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('zh-hans')">简</button>
+    <button class="lang-btn" onclick="setLang('zh-hant')">繁</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
   </div>
 </nav>
-
-<div class="hamburger-menu" id="hamburgerMenu">
-  <a href="#brands" onclick="closeMenu()">
-    <span data-lang="zh-hans">合作品牌</span>
-    <span data-lang="zh-hant">合作品牌</span>
-    <span data-lang="en">Brands</span>
-    <span class="arrow">↗</span>
-  </a>
-  <a href="#work" onclick="closeMenu()">
-    <span data-lang="zh-hans">作品案例</span>
-    <span data-lang="zh-hant">作品案例</span>
-    <span data-lang="en">Work</span>
-    <span class="arrow">↗</span>
-  </a>
-  <a href="#contact" onclick="closeMenu()">
-    <span data-lang="zh-hans">联系方式</span>
-    <span data-lang="zh-hant">聯絡方式</span>
-    <span data-lang="en">Contact</span>
-    <span class="arrow">↗</span>
-  </a>
-</div>
 
 <!-- HERO -->
 <section class="hero-blæd">
@@ -663,11 +588,19 @@
     <!-- Right side - Image -->
     <div class="hero-right">
       <div class="hero-image-large">
-        <div class="image-placeholder-large"></div>
+        <video autoplay loop muted playsinline>
+          <source src="marquee.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
   </div>
 
+  <!-- Bottom navigation bar -->
+  <div class="hero-bottom-nav">
+    <a href="#brands" class="bottom-nav-item" data-lang="zh-hans">合作品牌</a>
+    <a href="#work" class="bottom-nav-item" data-lang="zh-hans">作品案例</a>
+    <a href="#contact" class="bottom-nav-item" data-lang="zh-hans">联系方式</a>
+  </div>
 </section>
 
 <!-- BRANDS -->
@@ -1073,20 +1006,6 @@
 </footer>
 
 <script>
-  function toggleMenu() {
-    const btn = document.getElementById('hamburgerBtn');
-    const menu = document.getElementById('hamburgerMenu');
-    btn.classList.toggle('open');
-    menu.classList.toggle('open');
-  }
-  function closeMenu() {
-    document.getElementById('hamburgerBtn').classList.remove('open');
-    document.getElementById('hamburgerMenu').classList.remove('open');
-  }
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#hamburgerMenu')) closeMenu();
-  });
-
   function setLang(lang) {
     document.body.className = 'lang-' + lang;
     document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
