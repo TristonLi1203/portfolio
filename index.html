@@ -10,11 +10,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #ffffff;
-      --ink: #0a0a0a;
-      --ink-mid: #555555;
-      --ink-light: #aaaaaa;
-      --border: rgba(0,0,0,0.08);
+      --bg: #0a0a0a;
+      --ink: #f2f2f2;
+      --ink-mid: #a0a0a0;
+      --ink-light: #6b6b6b;
+      --border: rgba(255,255,255,0.08);
       --sans: 'Noto Sans SC', system-ui, sans-serif;
     }
 
@@ -35,44 +35,32 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 200;
       display: flex; justify-content: space-between; align-items: center;
       padding: 0 48px; height: 64px;
-      transition: background 0.4s, border-color 0.4s;
-    }
-    nav.nav-dark {
-      background: transparent;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    nav.nav-light {
-      background: rgba(255,255,255,0.92);
+      background: rgba(10,10,10,0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
     .nav-logo {
       font-size: 13px; font-weight: 500;
       letter-spacing: 0.12em; text-transform: uppercase;
-      text-decoration: none; transition: color 0.4s;
+      text-decoration: none;
+      color: var(--ink);
     }
-    nav.nav-dark  .nav-logo { color: rgba(255,255,255,0.85); }
-    nav.nav-light .nav-logo { color: var(--ink); }
 
     .nav-right { display: flex; align-items: center; gap: 12px; }
 
     .lang-switcher {
       display: flex; border-radius: 2px; overflow: hidden;
-      border: 1px solid; transition: border-color 0.4s;
+      border: 1px solid rgba(255,255,255,0.18);
     }
-    nav.nav-dark  .lang-switcher { border-color: rgba(255,255,255,0.18); }
-    nav.nav-light .lang-switcher { border-color: var(--border); }
-
     .lang-btn {
       font-size: 11px; letter-spacing: 0.04em; padding: 5px 10px;
       cursor: pointer; background: transparent; border: none;
-      border-right: 1px solid; font-family: var(--sans); transition: all 0.15s;
+      border-right: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.4);
+      font-family: var(--sans); transition: all 0.15s;
     }
     .lang-btn:last-child { border-right: none; }
-    nav.nav-dark  .lang-btn { color: rgba(255,255,255,0.4); border-right-color: rgba(255,255,255,0.12); }
-    nav.nav-light .lang-btn { color: var(--ink-light); border-right-color: var(--border); }
-    nav.nav-dark  .lang-btn.active { background: rgba(255,255,255,0.14); color: white; }
-    nav.nav-light .lang-btn.active { background: var(--ink); color: white; }
+    .lang-btn.active { background: #f2f2f2; color: #0a0a0a; }
     .lang-btn:hover { opacity: 0.75; }
 
     .hamburger-btn {
@@ -82,17 +70,16 @@
     }
     .hamburger-btn span {
       display: block; width: 20px; height: 1.5px;
-      transition: all 0.25s, background 0.4s; transform-origin: center;
+      background: rgba(255,255,255,0.75);
+      transition: all 0.25s; transform-origin: center;
     }
-    nav.nav-dark  .hamburger-btn span { background: rgba(255,255,255,0.75); }
-    nav.nav-light .hamburger-btn span { background: var(--ink); }
     .hamburger-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
     .hamburger-btn.open span:nth-child(2) { opacity: 0; }
     .hamburger-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
     .hamburger-menu {
       position: fixed; top: 64px; right: 0;
-      width: 220px; background: white;
+      width: 220px; background: #111111;
       border-left: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       display: none; z-index: 199;
@@ -106,14 +93,14 @@
       border-bottom: 1px solid var(--border); transition: background 0.15s;
     }
     .hamburger-menu a:last-child { border-bottom: none; }
-    .hamburger-menu a:hover { background: rgba(0,0,0,0.02); }
+    .hamburger-menu a:hover { background: rgba(255,255,255,0.04); }
     .hamburger-menu a .arrow { color: var(--ink-light); font-size: 14px; }
 
     /* ── HERO ── */
     .hero-stage {
       position: relative;
       width: 100%; height: 100vh;
-      background: #080808;
+      background: var(--bg);
       overflow: hidden;
     }
 
@@ -222,55 +209,47 @@
     .work-title { font-size: 40px; font-weight: 400; }
     .work-subtitle { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); }
 
-    .cat-tabs { display: flex; margin-bottom: 40px; border-bottom: 1px solid var(--border); }
-    .cat-tab {
-      font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--ink-light); padding: 12px 20px; cursor: pointer;
-      border-bottom: 2px solid transparent; margin-bottom: -1px;
-      transition: all 0.2s; background: none;
-      border-top: none; border-left: none; border-right: none;
-      font-family: var(--sans);
+    /* Staggered grid (podium-style) */
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      align-items: start;
     }
-    .cat-tab:hover { color: var(--ink); }
-    .cat-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
-    .cat-panel { display: none; }
-    .cat-panel.active { display: block; }
+    .work-col { display: flex; flex-direction: column; gap: 24px; }
+    /* zigzag vertical offsets — applied only when 4 columns (JS adds .staggered) */
+    .work-grid.staggered .work-col:nth-child(1) { padding-top: 3vw; }
+    .work-grid.staggered .work-col:nth-child(2) { padding-top: 9vw; }
+    .work-grid.staggered .work-col:nth-child(3) { padding-top: 0; }
+    .work-grid.staggered .work-col:nth-child(4) { padding-top: 6vw; }
 
-    .asym-grid { display: grid; grid-template-columns: repeat(12,1fr); gap: 2px; }
-    .ag-full { grid-column: span 12; }
-    .ag-7 { grid-column: span 7; }
-    .ag-5 { grid-column: span 5; }
-    .ag-8 { grid-column: span 8; }
-    .ag-4 { grid-column: span 4; }
-    .ag-6 { grid-column: span 6; }
-    .ag-3 { grid-column: span 3; }
-
-    .work-item { position: relative; overflow: hidden; cursor: pointer; background: #f5f5f5; }
-    .work-item-inner { position: relative; width: 100%; padding-bottom: 62%; overflow: hidden; }
-    .ag-7 .work-item-inner { padding-bottom: 68%; }
-    .ag-5 .work-item-inner { padding-bottom: 75%; }
-    .ag-full .work-item-inner { padding-bottom: 45%; }
-
+    .work-card { cursor: pointer; }
+    .work-thumb-box {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      border-radius: 3px;
+      background: #151515;
+    }
     .thumb-fill { position: absolute; inset: 0; transition: transform 0.5s ease; }
-    .work-item:hover .thumb-fill { transform: scale(1.04); }
+    .work-card:hover .thumb-fill { transform: scale(1.04); }
     .work-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
       opacity: 0; transition: opacity 0.3s;
       display: flex; align-items: flex-end; padding: 20px;
     }
-    .work-item:hover .work-overlay { opacity: 1; }
+    .work-card:hover .work-overlay { opacity: 1; }
     .overlay-play {
       width: 44px; height: 44px; border-radius: 50%;
       border: 1.5px solid rgba(255,255,255,0.8);
       display: flex; align-items: center; justify-content: center;
     }
     .overlay-play svg { margin-left: 2px; }
-    .work-info { padding: 16px 0 8px; }
+    .work-info { padding: 14px 0 4px; }
     .work-info-badge { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 4px; }
     .work-info-title { font-size: 14px; font-weight: 400; color: var(--ink); margin-bottom: 4px; }
     .work-info-meta { font-size: 12px; color: var(--ink-light); }
-    .row-gap { margin-bottom: 2px; }
 
     /* ── ABOUT ── */
     .about-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); }
@@ -288,7 +267,7 @@
     .skill-tag { font-size: 12px; padding: 6px 14px; border: 1px solid var(--border); color: var(--ink-mid); }
 
     /* ── CONTACT ── */
-    .contact-section { background: var(--ink); padding: 80px 48px; }
+    .contact-section { background: #050505; padding: 80px 48px; }
     .contact-top {
       display: flex; justify-content: space-between; align-items: flex-start;
       margin-bottom: 64px; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -309,7 +288,7 @@
     .contact-arrow { color: rgba(255,255,255,0.2); font-size: 16px; }
 
     footer {
-      background: var(--ink); border-top: 1px solid rgba(255,255,255,0.06);
+      background: #050505; border-top: 1px solid rgba(255,255,255,0.06);
       padding: 20px 48px; display: flex; justify-content: space-between;
     }
     footer span { font-size: 11px; color: rgba(255,255,255,0.18); letter-spacing: 0.04em; }
@@ -334,7 +313,6 @@
       .brands-section, .work-section, .about-left, .about-right { padding: 48px 20px; }
       .about-section { grid-template-columns: 1fr; }
       .about-left { border-right: none; border-bottom: 1px solid var(--border); }
-      .ag-7,.ag-5,.ag-8,.ag-4,.ag-6,.ag-3 { grid-column: span 12; }
       .contact-section { padding: 48px 20px; }
       .contact-top { flex-direction: column; gap: 40px; }
       footer { padding: 20px; }
@@ -344,7 +322,7 @@
 <body class="lang-zh-hans">
 
 <!-- NAV -->
-<nav id="mainNav" class="nav-dark">
+<nav id="mainNav">
   <a href="#" class="nav-logo">Triston Li</a>
   <div class="nav-right">
     <div class="lang-switcher">
@@ -438,137 +416,7 @@
     <span class="work-subtitle">Selected Works</span>
   </div>
 
-  <div class="cat-tabs">
-    <button class="cat-tab active" onclick="setTab(this,'all')">
-      <span data-lang="zh-hans">全部</span><span data-lang="zh-hant">全部</span><span data-lang="en">All</span>
-    </button>
-    <button class="cat-tab" onclick="setTab(this,'fashion')">
-      <span data-lang="zh-hans">时尚</span><span data-lang="zh-hant">時尚</span><span data-lang="en">Fashion</span>
-    </button>
-    <button class="cat-tab" onclick="setTab(this,'sport')">
-      <span data-lang="zh-hans">运动</span><span data-lang="zh-hant">運動</span><span data-lang="en">Sport</span>
-    </button>
-    <button class="cat-tab" onclick="setTab(this,'digital')">
-      <span data-lang="zh-hans">新媒体</span><span data-lang="zh-hant">新媒體</span><span data-lang="en">Digital</span>
-    </button>
-    <button class="cat-tab" onclick="setTab(this,'doc')">
-      <span data-lang="zh-hans">纪录片</span><span data-lang="zh-hant">紀錄片</span><span data-lang="en">Documentary</span>
-    </button>
-  </div>
-
-  <div class="cat-panel active" id="panel-all">
-    <div class="asym-grid row-gap">
-      <div class="ag-7">
-        <div class="work-item">
-          <div class="work-item-inner">
-            <div class="thumb-fill" style="background:#E2DDD6;"></div>
-            <div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div>
-          </div>
-          <div class="work-info">
-            <p class="work-info-badge"><span data-lang="zh-hans">时尚 · TVC</span><span data-lang="zh-hant">時尚 · TVC</span><span data-lang="en">Fashion · TVC</span></p>
-            <p class="work-info-title"><span data-lang="zh-hans">某时尚品牌春季形象片</span><span data-lang="zh-hant">某時尚品牌春季形象片</span><span data-lang="en">Fashion Brand Spring Campaign</span></p>
-            <p class="work-info-meta">2024 · 2'30"</p>
-          </div>
-        </div>
-      </div>
-      <div class="ag-5">
-        <div class="work-item">
-          <div class="work-item-inner">
-            <div class="thumb-fill" style="background:#D8DCE0;"></div>
-            <div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div>
-          </div>
-          <div class="work-info">
-            <p class="work-info-badge"><span data-lang="zh-hans">运动 · 品牌片</span><span data-lang="zh-hant">運動 · 品牌片</span><span data-lang="en">Sport · Brand Film</span></p>
-            <p class="work-info-title"><span data-lang="zh-hans">运动品牌产品宣传片</span><span data-lang="zh-hant">運動品牌產品宣傳片</span><span data-lang="en">Sportswear Brand Product Film</span></p>
-            <p class="work-info-meta">2024 · 1'45"</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="asym-grid row-gap">
-      <div class="ag-4">
-        <div class="work-item">
-          <div class="work-item-inner">
-            <div class="thumb-fill" style="background:#DDE0DC;"></div>
-            <div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div>
-          </div>
-          <div class="work-info">
-            <p class="work-info-badge"><span data-lang="zh-hans">新媒体 · 小红书</span><span data-lang="zh-hant">新媒體 · 小紅書</span><span data-lang="en">Digital · Xiaohongshu</span></p>
-            <p class="work-info-title"><span data-lang="zh-hans">品牌系列短视频</span><span data-lang="zh-hant">品牌系列短視頻</span><span data-lang="en">Brand Short-form Series</span></p>
-            <p class="work-info-meta">2024</p>
-          </div>
-        </div>
-      </div>
-      <div class="ag-4">
-        <div class="work-item">
-          <div class="work-item-inner">
-            <div class="thumb-fill" style="background:#E0DDD9;"></div>
-            <div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div>
-          </div>
-          <div class="work-info">
-            <p class="work-info-badge"><span data-lang="zh-hans">纪录片 · 人物</span><span data-lang="zh-hant">紀錄片 · 人物</span><span data-lang="en">Documentary · Portrait</span></p>
-            <p class="work-info-title"><span data-lang="zh-hans">人物纪录短片</span><span data-lang="zh-hant">人物紀錄短片</span><span data-lang="en">Portrait Documentary</span></p>
-            <p class="work-info-meta">2023 · 12'00"</p>
-          </div>
-        </div>
-      </div>
-      <div class="ag-4">
-        <div class="work-item">
-          <div class="work-item-inner">
-            <div class="thumb-fill" style="background:#DCDCE0;"></div>
-            <div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div>
-          </div>
-          <div class="work-info">
-            <p class="work-info-badge"><span data-lang="zh-hans">活动 · 现场</span><span data-lang="zh-hant">活動 · 現場</span><span data-lang="en">Event · Live</span></p>
-            <p class="work-info-title"><span data-lang="zh-hans">品牌发布活动现场剪辑</span><span data-lang="zh-hant">品牌發佈活動現場剪輯</span><span data-lang="en">Brand Launch Event Edit</span></p>
-            <p class="work-info-meta">2023</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="asym-grid">
-      <div class="ag-full">
-        <div class="work-item">
-          <div class="work-item-inner">
-            <div class="thumb-fill" style="background:#E8E4E0;"></div>
-            <div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div>
-          </div>
-          <div class="work-info">
-            <p class="work-info-badge"><span data-lang="zh-hans">时尚 · 品牌故事</span><span data-lang="zh-hant">時尚 · 品牌故事</span><span data-lang="en">Fashion · Brand Story</span></p>
-            <p class="work-info-title"><span data-lang="zh-hans">品牌周年故事片</span><span data-lang="zh-hant">品牌週年故事片</span><span data-lang="en">Brand Anniversary Film</span></p>
-            <p class="work-info-meta">2023 · 5'00"</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="cat-panel" id="panel-fashion">
-    <div class="asym-grid">
-      <div class="ag-7"><div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#E2DDD6;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div><div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">时尚 · TVC</span></p><p class="work-info-title"><span data-lang="zh-hans">春季形象片</span></p><p class="work-info-meta">2024</p></div></div></div>
-      <div class="ag-5"><div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#E8E4E0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div><div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">时尚 · 品牌故事</span></p><p class="work-info-title"><span data-lang="zh-hans">品牌周年故事片</span></p><p class="work-info-meta">2023</p></div></div></div>
-    </div>
-  </div>
-
-  <div class="cat-panel" id="panel-sport">
-    <div class="asym-grid">
-      <div class="ag-full"><div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#D8DCE0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div><div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">运动 · 品牌片</span></p><p class="work-info-title"><span data-lang="zh-hans">运动品牌宣传片</span></p><p class="work-info-meta">2024</p></div></div></div>
-    </div>
-  </div>
-
-  <div class="cat-panel" id="panel-digital">
-    <div class="asym-grid">
-      <div class="ag-6"><div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#DDE0DC;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div><div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">新媒体 · 小红书</span></p><p class="work-info-title"><span data-lang="zh-hans">品牌系列短视频</span></p><p class="work-info-meta">2024</p></div></div></div>
-      <div class="ag-6"><div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#DCDCE0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div><div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">新媒体 · 抖音</span></p><p class="work-info-title"><span data-lang="zh-hans">抖音品牌植入短片</span></p><p class="work-info-meta">2024</p></div></div></div>
-    </div>
-  </div>
-
-  <div class="cat-panel" id="panel-doc">
-    <div class="asym-grid">
-      <div class="ag-8"><div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#E0DDD9;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div><div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">纪录片 · 人物</span></p><p class="work-info-title"><span data-lang="zh-hans">人物纪录短片</span></p><p class="work-info-meta">2023 · 12'00"</p></div></div></div>
-      <div class="ag-4"><div class="work-item"><div class="work-item-inner"><div class="thumb-fill" style="background:#DCDCE0;"></div><div class="work-overlay"><div class="overlay-play"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg></div></div></div><div class="work-info"><p class="work-info-badge"><span data-lang="zh-hans">采访 · 人物</span></p><p class="work-info-title"><span data-lang="zh-hans">品牌创始人专访</span></p><p class="work-info-meta">2022</p></div></div></div>
-    </div>
-  </div>
+  <div class="work-grid" id="workGrid"></div>
 </section>
 
 <!-- ABOUT -->
@@ -753,14 +601,97 @@
       onUpdate: self => {
         document.getElementById('scrollHint').classList.toggle('hidden', self.progress > 0.04);
       },
-      /* nav stays dark for the whole pinned hero, flips to light after it releases */
-      onToggle: self => mainNav.className = self.isActive ? 'nav-dark' : 'nav-light',
     });
-    mainNav.className = 'nav-dark';
   }
 
-  const mainNav = document.getElementById('mainNav');
   createHeroTriggers();
+
+  /* ── WORK GRID · staggered columns + scroll reveal ── */
+  const WORKS = [
+    { badge: ['时尚 · TVC','時尚 · TVC','Fashion · TVC'],
+      title: ['某时尚品牌春季形象片','某時尚品牌春季形象片','Fashion Brand Spring Campaign'],
+      year: '2024', client: 'Brand A', color: '#E2DDD6' },
+    { badge: ['运动 · 品牌片','運動 · 品牌片','Sport · Brand Film'],
+      title: ['运动品牌产品宣传片','運動品牌產品宣傳片','Sportswear Product Film'],
+      year: '2024', client: 'Brand B', color: '#D8DCE0' },
+    { badge: ['新媒体 · 小红书','新媒體 · 小紅書','Digital · Xiaohongshu'],
+      title: ['品牌系列短视频','品牌系列短視頻','Brand Short-form Series'],
+      year: '2024', client: 'Brand C', color: '#DDE0DC' },
+    { badge: ['纪录片 · 人物','紀錄片 · 人物','Documentary · Portrait'],
+      title: ['人物纪录短片','人物紀錄短片','Portrait Documentary'],
+      year: '2023', client: 'Brand D', color: '#E0DDD9' },
+    { badge: ['活动 · 现场','活動 · 現場','Event · Live'],
+      title: ['品牌发布活动现场剪辑','品牌發佈活動現場剪輯','Brand Launch Event Edit'],
+      year: '2023', client: 'Brand E', color: '#DCDCE0' },
+    { badge: ['时尚 · 品牌故事','時尚 · 品牌故事','Fashion · Brand Story'],
+      title: ['品牌周年故事片','品牌週年故事片','Brand Anniversary Film'],
+      year: '2023', client: 'Brand F', color: '#E8E4E0' },
+    { badge: ['新媒体 · 抖音','新媒體 · 抖音','Digital · Douyin'],
+      title: ['抖音品牌植入短片','抖音品牌植入短片','Douyin Brand Integration'],
+      year: '2024', client: 'Brand C', color: '#D9DEE2' },
+    { badge: ['采访 · 人物','採訪 · 人物','Interview · Portrait'],
+      title: ['品牌创始人专访','品牌創始人專訪','Founder Interview'],
+      year: '2022', client: 'Brand D', color: '#E4E0DA' },
+  ];
+
+  const PLAY_SVG = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>';
+
+  function workCardHTML(w) {
+    const langSpans = arr =>
+      `<span data-lang="zh-hans">${arr[0]}</span><span data-lang="zh-hant">${arr[1]}</span><span data-lang="en">${arr[2]}</span>`;
+    return `<div class="work-card">
+      <div class="work-thumb-box">
+        <div class="thumb-fill" style="background:${w.color};"></div>
+        <div class="work-overlay"><div class="overlay-play">${PLAY_SVG}</div></div>
+      </div>
+      <div class="work-info">
+        <p class="work-info-badge">${langSpans(w.badge)}</p>
+        <p class="work-info-title">${langSpans(w.title)}</p>
+        <p class="work-info-meta">${w.year} · ${w.client}</p>
+      </div>
+    </div>`;
+  }
+
+  function buildWorkGrid() {
+    const grid = document.getElementById('workGrid');
+    const W = window.innerWidth;
+    const n = W > 1024 ? 4 : W > 640 ? 2 : 1;
+
+    grid.className = 'work-grid' + (n === 4 ? ' staggered' : '');
+    grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+    grid.innerHTML = '';
+
+    const cols = [];
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('div');
+      c.className = 'work-col';
+      grid.appendChild(c);
+      cols.push(c);
+    }
+    WORKS.forEach((w, i) => cols[i % n].insertAdjacentHTML('beforeend', workCardHTML(w)));
+
+    /* reveal: rise from below + fade in as each card enters the viewport */
+    grid.querySelectorAll('.work-card').forEach(card => {
+      gsap.from(card, {
+        y: 56, opacity: 0, duration: 0.75, ease: 'power2.out',
+        scrollTrigger: { trigger: card, start: 'top 88%', once: true },
+      });
+    });
+
+    /* subtle per-column parallax (desktop only) */
+    if (n === 4) {
+      const drift = [0, -34, -10, -24];
+      cols.forEach((col, i) => {
+        if (!drift[i]) return;
+        gsap.to(col, {
+          y: drift[i], ease: 'none',
+          scrollTrigger: { trigger: grid, start: 'top bottom', end: 'bottom top', scrub: true },
+        });
+      });
+    }
+  }
+
+  buildWorkGrid();
 
   /* Recompute on resize */
   let resizeTimer;
@@ -770,6 +701,7 @@
       if (editMode) { enterEditMode(); return; }
       ScrollTrigger.getAll().forEach(t => t.kill());
       createHeroTriggers();
+      buildWorkGrid();
       ScrollTrigger.refresh();
     }, 200);
   });
@@ -875,13 +807,6 @@
     document.documentElement.lang = lang === 'zh-hans' ? 'zh-Hans' : lang === 'zh-hant' ? 'zh-Hant' : 'en';
   }
 
-  /* ── WORK TABS ── */
-  function setTab(el, panel) {
-    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.cat-panel').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('panel-' + panel).classList.add('active');
-  }
 </script>
 </body>
 </html>
