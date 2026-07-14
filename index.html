@@ -107,7 +107,7 @@
 
     .hero-cards {
       position: absolute; inset: 0;
-      perspective: 1100px;
+      perspective: 900px;
       perspective-origin: 50% 50%;
       transform-style: preserve-3d;
     }
@@ -186,19 +186,30 @@
       font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
       color: var(--ink-light); margin-bottom: 40px; text-align: center;
     }
-    .brands-track {
-      display: flex; align-items: center;
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    /* 3D rotating brand cloud */
+    .brand-cloud {
+      position: relative;
+      height: 460px;
+      max-width: 720px;
+      margin: 0 auto;
+      overflow: visible;
     }
-    .brand-item {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      padding: 28px 20px; border-right: 1px solid var(--border); transition: background 0.2s;
+    .brand-tag {
+      position: absolute;
+      left: 50%; top: 50%;
+      user-select: none;
+      will-change: transform, opacity;
+      pointer-events: none;
     }
-    .brand-item:last-child { border-right: none; }
-    .brand-item:hover { background: rgba(0,0,0,0.02); }
-    .brand-placeholder span {
-      font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--ink-light); font-weight: 500;
+    .brand-tag img {
+      height: 44px; width: auto;
+      max-width: 180px;
+      object-fit: contain;
+      display: block;
+    }
+    @media (max-width: 640px) {
+      .brand-cloud { height: 320px; }
+      .brand-tag img { height: 30px; max-width: 120px; }
     }
 
     /* ── WORK ── */
@@ -432,14 +443,7 @@
     <span data-lang="zh-hant">合作品牌</span>
     <span data-lang="en">Selected Clients</span>
   </p>
-  <div class="brands-track">
-    <div class="brand-item"><div class="brand-placeholder"><span>Brand A</span></div></div>
-    <div class="brand-item"><div class="brand-placeholder"><span>Brand B</span></div></div>
-    <div class="brand-item"><div class="brand-placeholder"><span>Brand C</span></div></div>
-    <div class="brand-item"><div class="brand-placeholder"><span>Brand D</span></div></div>
-    <div class="brand-item"><div class="brand-placeholder"><span>Brand E</span></div></div>
-    <div class="brand-item"><div class="brand-placeholder"><span>Brand F</span></div></div>
-  </div>
+  <div class="brand-cloud" id="brandCloud"></div>
 </section>
 
 <!-- MANIFESTO -->
@@ -566,24 +570,28 @@
      No rotation — all cards stay perfectly horizontal. */
   const cards = gsap.utils.toArray('.card');
 
-  const Z_FAR   = -2600;  // deepest point of the tunnel
+  const Z_FAR   = -3200;  // deepest point of the tunnel
   const Z_END   =   700;  // past the camera
   const Z_PEAK  =     0;  // brightest at the center plane
 
   /* Scattered x/y offsets (vw/vh fractions) — perspective spreads them as z grows.
-     zStart staggers cards along the tunnel so the scene reads as deep space at load. */
+     zStart staggers cards along the tunnel (non-linear gaps read deeper);
+     deeper cards get LARGER lateral offsets so their projected positions
+     stay clearly apart instead of clustering at the vanishing point. */
   const CARD_POS = [
-    { x:  0.13, y: -0.10, zStart:  -450 },
-    { x: -0.18, y: -0.32, zStart: -1150 },
-    { x:  0.06, y: -0.22, zStart: -1850 },
-    { x: -0.21, y: -0.10, zStart: -2600 },
+    { x:  0.13, y: -0.10, zStart:  -350 },
+    { x: -0.20, y: -0.34, zStart: -1050 },
+    { x:  0.30, y: -0.40, zStart: -2000 },
+    { x: -0.48, y:  0.18, zStart: -3200 },
   ];
 
   function lightFor(z) {
-    /* brightness: dark at far, 1.0 at center plane, dark again past camera */
+    /* brightness: dark at far, 1.0 at center plane, dark again past camera.
+       Gentler curve (t^1.4) keeps mid-depth cards distinguishable from the
+       deepest ones instead of both reading as equally dim. */
     if (z <= Z_PEAK) {
       const t = (z - Z_FAR) / (Z_PEAK - Z_FAR);        // 0 → 1
-      return { bright: 0.12 + 0.88 * t * t, alpha: Math.min(1, t * 2.4) };
+      return { bright: 0.08 + 0.92 * Math.pow(t, 1.4), alpha: Math.min(1, t * 2.2) };
     } else {
       const t = (z - Z_PEAK) / (Z_END - Z_PEAK);       // 0 → 1
       return { bright: Math.max(0.05, 1 - t * 1.35), alpha: Math.max(0, 1 - t * 1.5) };
@@ -739,10 +747,9 @@
     gsap.timeline({
       scrollTrigger: {
         trigger: '#brands',
-        start: 'top 80%',
-        endTrigger: '#manifesto',
-        end: 'center 55%',
-        scrub: 1.5,
+        start: 'top 98%',
+        end: 'top 45%',
+        scrub: 1,
       },
     }).to('html', {
       '--bg': '#ffffff',
@@ -762,6 +769,86 @@
   }
 
   createInvertTrigger();
+
+  /* ── 3D BRAND CLOUD ── */
+  /* Brand names distributed on a sphere (fibonacci lattice), auto-rotating;
+     hovering steers the rotation like TagCanvas. DOM elements (not canvas)
+     so colors follow the CSS variables through the dark→light inversion. */
+  const BRANDS = [
+    { name: 'FILA',            src: 'logos/fila.png' },
+    { name: 'MO&Co.',          src: 'logos/moco.png' },
+    { name: 'CryingCenter',    src: 'logos/cryingcenter.png' },
+    { name: 'KELME',           src: 'logos/kelme.png' },
+    { name: 'XTEP 特步',        src: 'logos/xtep.png' },
+    { name: 'URBAN REVIVO',    src: 'logos/urban-revivo.png' },
+    { name: 'LI-NING 李宁',     src: 'logos/lining.png' },
+    { name: 'STACCATO 思加图',  src: 'logos/staccato.png' },
+    { name: '蕉下 Beneunder',   src: 'logos/beneunder.png' },
+    { name: 'MOLSION 陌森',     src: 'logos/molsion.png' },
+    { name: 'BELLE 百丽',       src: 'logos/belle.png' },
+  ];
+
+  (function initBrandCloud() {
+    const box = document.getElementById('brandCloud');
+    if (!box) return;
+
+    const N = BRANDS.length;
+    const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+    const pts = [];
+    for (let i = 0; i < N; i++) {
+      const y = 1 - (i / (N - 1)) * 2;
+      const r = Math.sqrt(1 - y * y);
+      const th = GOLDEN * i;
+      const el = document.createElement('span');
+      el.className = 'brand-tag';
+      const img = document.createElement('img');
+      img.src = BRANDS[i].src;
+      img.alt = BRANDS[i].name;
+      el.appendChild(img);
+      box.appendChild(el);
+      pts.push({ x: Math.cos(th) * r, y, z: Math.sin(th) * r, el });
+    }
+
+    let W = box.clientWidth, H = box.clientHeight;
+    new ResizeObserver(() => { W = box.clientWidth; H = box.clientHeight; }).observe(box);
+
+    /* rotation velocity — defaults to slow drift, steered by hover */
+    let vx = 0.0022, vy = 0.0009, tx = vx, ty = vy;
+    box.parentElement.addEventListener('mousemove', e => {
+      const rect = box.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) / rect.width - 0.5;
+      const my = (e.clientY - rect.top) / rect.height - 0.5;
+      tx = mx * 0.012;
+      ty = -my * 0.012;
+    });
+    box.parentElement.addEventListener('mouseleave', () => { tx = 0.0022; ty = 0.0009; });
+
+    function tick() {
+      vx += (tx - vx) * 0.04;
+      vy += (ty - vy) * 0.04;
+      const R = Math.min(W, H) * 0.42;
+      const cx = Math.cos(vy), sx = Math.sin(vy);
+      const cy = Math.cos(vx), sy = Math.sin(vx);
+      pts.forEach(p => {
+        /* rotate around X (pitch), then Y (yaw) */
+        let y = p.y * cx - p.z * sx;
+        let z = p.y * sx + p.z * cx;
+        p.y = y; p.z = z;
+        let x = p.x * cy + p.z * sy;
+        z = -p.x * sy + p.z * cy;
+        p.x = x; p.z = z;
+
+        const depth = (p.z + 1) / 2;              /* 0 = back, 1 = front */
+        const scale = 0.5 + 0.5 * depth;
+        p.el.style.transform =
+          `translate(-50%,-50%) translate(${p.x * R}px, ${p.y * R}px) scale(${scale.toFixed(3)})`;
+        p.el.style.opacity = (0.18 + 0.82 * depth).toFixed(3);
+        p.el.style.zIndex = Math.round(depth * 100);
+      });
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
 
   /* Recompute on resize */
   let resizeTimer;
