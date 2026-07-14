@@ -245,6 +245,37 @@
     }
     .thumb-fill { position: absolute; inset: 0; transition: transform 0.5s ease; }
     .work-card:hover .thumb-fill { transform: scale(1.04); }
+    .thumb-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .work-card:hover .thumb-img { transform: scale(1.04); }
+
+    /* ── LIGHTBOX PLAYER ── */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 600;
+      background: rgba(0,0,0,0.93);
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 5vh 5vw;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox video {
+      max-width: 100%; max-height: 100%;
+      background: #000;
+      outline: none;
+    }
+    .lightbox-close {
+      position: absolute; top: 18px; right: 26px;
+      font-size: 30px; line-height: 1;
+      color: rgba(255,255,255,0.6);
+      background: none; border: none; cursor: pointer;
+      transition: color 0.2s;
+      z-index: 601;
+    }
+    .lightbox-close:hover { color: #fff; }
     .work-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
@@ -551,6 +582,12 @@
   </span>
 </footer>
 
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <video id="lightboxVideo" controls playsinline></video>
+</div>
+
 <!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -657,8 +694,10 @@
       title: ['某时尚品牌春季形象片','某時尚品牌春季形象片','Fashion Brand Spring Campaign'],
       year: '2024', client: 'Brand A', color: '#E2DDD6' },
     { badge: ['运动 · 品牌片','運動 · 品牌片','Sport · Brand Film'],
-      title: ['运动品牌产品宣传片','運動品牌產品宣傳片','Sportswear Product Film'],
-      year: '2024', client: 'Brand B', color: '#D8DCE0' },
+      title: ['特步 × 中国霹雳舞国家队','特步 × 中國霹靂舞國家隊','XTEP × China Breaking National Team'],
+      year: '2024', client: 'XTEP 特步', color: '#D8DCE0',
+      poster: 'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/cover/%E7%89%B9%E6%AD%A5x%E4%B8%AD%E5%9B%BD%E9%9C%B9%E9%9B%B3%E8%88%9E%E5%9B%BD%E5%AE%B6%E9%98%9F%EF%BC%88Dir%EF%BC%89%204%3A3-0001.png',
+      video: 'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/%E7%89%B9%E6%AD%A5x%E4%B8%AD%E5%9B%BD%E9%9C%B9%E9%9B%B3%E8%88%9E%E5%9B%BD%E5%AE%B6%E9%98%9F.mp4' },
     { badge: ['新媒体 · 小红书','新媒體 · 小紅書','Digital · Xiaohongshu'],
       title: ['品牌系列短视频','品牌系列短視頻','Brand Short-form Series'],
       year: '2024', client: 'Brand C', color: '#DDE0DC' },
@@ -681,12 +720,15 @@
 
   const PLAY_SVG = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>';
 
-  function workCardHTML(w) {
+  function workCardHTML(w, idx) {
     const langSpans = arr =>
       `<span data-lang="zh-hans">${arr[0]}</span><span data-lang="zh-hant">${arr[1]}</span><span data-lang="en">${arr[2]}</span>`;
-    return `<div class="work-card">
+    const thumb = w.poster
+      ? `<img class="thumb-img" src="${w.poster}" alt="" loading="lazy">`
+      : `<div class="thumb-fill" style="background:${w.color};"></div>`;
+    return `<div class="work-card" data-idx="${idx}">
       <div class="work-thumb-box">
-        <div class="thumb-fill" style="background:${w.color};"></div>
+        ${thumb}
         <div class="work-overlay"><div class="overlay-play">${PLAY_SVG}</div></div>
       </div>
       <div class="work-info">
@@ -713,7 +755,15 @@
       grid.appendChild(c);
       cols.push(c);
     }
-    WORKS.forEach((w, i) => cols[i % n].insertAdjacentHTML('beforeend', workCardHTML(w)));
+    WORKS.forEach((w, i) => cols[i % n].insertAdjacentHTML('beforeend', workCardHTML(w, i)));
+
+    /* click → lightbox player (cards that have a video) */
+    grid.querySelectorAll('.work-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const w = WORKS[+card.dataset.idx];
+        if (w && w.video) openLightbox(w.video);
+      });
+    });
 
     /* reveal: rise from below + fade in as each card enters the viewport */
     grid.querySelectorAll('.work-card').forEach(card => {
@@ -943,6 +993,31 @@
   });
 
   document.addEventListener('mouseup', () => { dragCard = null; });
+
+  /* ── LIGHTBOX ── */
+  function openLightbox(src) {
+    const lb = document.getElementById('lightbox');
+    const v = document.getElementById('lightboxVideo');
+    v.src = src;
+    lb.classList.add('open');
+    lenis.stop();
+    v.play().catch(() => {});
+  }
+  function closeLightbox() {
+    const lb = document.getElementById('lightbox');
+    const v = document.getElementById('lightboxVideo');
+    v.pause();
+    v.removeAttribute('src');
+    v.load();
+    lb.classList.remove('open');
+    lenis.start();
+  }
+  document.getElementById('lightbox').addEventListener('click', e => {
+    if (e.target.id === 'lightbox') closeLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+  });
 
   /* ── HAMBURGER ── */
   function toggleMenu() {
