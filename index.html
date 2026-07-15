@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,20 +49,43 @@
 
     .nav-right { display: flex; align-items: center; gap: 12px; }
 
-    .lang-switcher {
-      display: flex; border-radius: 2px; overflow: hidden;
+    /* Collapsible language switcher: collapsed shows only the current
+       language; hover/click expands the other two. Colors follow the
+       theme variables through the dark→light inversion. */
+    .lang {
+      display: inline-flex; align-items: center;
       border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
     }
-    .lang-btn {
-      font-size: 11px; letter-spacing: 0.04em; padding: 5px 10px;
-      cursor: pointer; background: transparent; border: none;
-      border-right: 1px solid var(--border);
+    .lang-item {
+      display: none;
+      align-items: center; gap: 6px;
+      padding: 6px 12px;
+      font-size: 11px; letter-spacing: 0.05em;
+      text-decoration: none;
       color: var(--ink-light);
-      font-family: var(--sans); transition: opacity 0.15s;
+      white-space: nowrap;
+      transition: color 0.15s, background 0.15s;
     }
-    .lang-btn:last-child { border-right: none; }
-    .lang-btn.active { background: var(--ink); color: var(--bg); }
-    .lang-btn:hover { opacity: 0.75; }
+    .lang-item.is-current {
+      display: inline-flex;
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .lang-item.is-current::after {
+      content: '';
+      width: 0; height: 0;
+      border-left: 3.5px solid transparent;
+      border-right: 3.5px solid transparent;
+      border-top: 4.5px solid currentColor;
+      opacity: 0.45;
+      transition: transform 0.2s;
+    }
+    .lang--opened .lang-item { display: inline-flex; }
+    .lang--opened .lang-item.is-current::after { transform: rotate(180deg); }
+    .lang--opened .lang-item:not(.is-current) { border-left: 1px solid var(--border); }
+    .lang-item:not(.is-current):hover { color: var(--ink); }
 
     .hamburger-btn {
       width: 36px; height: 36px;
@@ -383,16 +406,16 @@
     }
   </style>
 </head>
-<body class="lang-zh-hans">
+<body class="lang-en">
 
 <!-- NAV -->
 <nav id="mainNav">
   <a href="#" class="nav-logo">Triston Li</a>
   <div class="nav-right">
-    <div class="lang-switcher">
-      <button class="lang-btn active" onclick="setLang('zh-hans')">简</button>
-      <button class="lang-btn" onclick="setLang('zh-hant')">繁</button>
-      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <div class="lang" id="langSwitch">
+      <a class="lang-item" data-code="en" href="./">EN</a>
+      <a class="lang-item" data-code="zh-hans" href="?lang=zh-hans">简</a>
+      <a class="lang-item" data-code="zh-hant" href="?lang=zh-hant">繁</a>
     </div>
     <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
       <span></span><span></span><span></span>
@@ -1033,13 +1056,35 @@
     if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#hamburgerMenu')) closeMenu();
   });
 
-  /* ── LANG ── */
-  function setLang(lang) {
-    document.body.className = 'lang-' + lang;
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    document.documentElement.lang = lang === 'zh-hans' ? 'zh-Hans' : lang === 'zh-hant' ? 'zh-Hant' : 'en';
-  }
+  /* ── LANG ── EN is the default landing language (root path);
+     zh-hans / zh-hant are addressed via ?lang= so links survive reload & sharing */
+  (function initLang() {
+    const params = new URLSearchParams(location.search);
+    let lang = params.get('lang');
+    if (lang !== 'zh-hans' && lang !== 'zh-hant') lang = 'en';
+
+    document.body.classList.remove('lang-en', 'lang-zh-hans', 'lang-zh-hant');
+    document.body.classList.add('lang-' + lang);
+    document.documentElement.lang = lang === 'en' ? 'en' : lang === 'zh-hans' ? 'zh-Hans' : 'zh-Hant';
+
+    const sw = document.getElementById('langSwitch');
+    sw.querySelectorAll('.lang-item').forEach(a =>
+      a.classList.toggle('is-current', a.dataset.code === lang));
+
+    /* collapsed by default; current item (or hover) toggles the panel */
+    sw.addEventListener('click', e => {
+      const item = e.target.closest('.lang-item');
+      if (item && item.classList.contains('is-current')) {
+        e.preventDefault();
+        sw.classList.toggle('lang--opened');
+      }
+    });
+    sw.addEventListener('mouseenter', () => sw.classList.add('lang--opened'));
+    sw.addEventListener('mouseleave', () => sw.classList.remove('lang--opened'));
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.lang')) sw.classList.remove('lang--opened');
+    });
+  })();
 
 </script>
 </body>
