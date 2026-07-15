@@ -120,28 +120,24 @@
     .hamburger-menu a:hover { background: rgba(255,255,255,0.04); }
     .hamburger-menu a .arrow { color: var(--ink-light); font-size: 14px; }
 
-    /* ── HERO ── */
+    /* ── HERO · vinyl reveal ──
+       Layers bottom→top: staggered videos → radial white veil →
+       vinyl (wrap scales, disc rotates, gloss stays still) → corner texts */
     .hero-stage {
       position: relative;
       width: 100%; height: 100vh;
-      background: var(--bg);
+      background: #ffffff;   /* animated to dark near the end of the pin */
       overflow: hidden;
     }
 
-    .hero-cards {
-      position: absolute; inset: 0;
-      perspective: 900px;
-      perspective-origin: 50% 50%;
-      transform-style: preserve-3d;
-    }
+    .hero-cards { position: absolute; inset: 0; }
 
     .card {
       position: absolute;
       top: 50%; left: 50%;
       border-radius: 3px;
       overflow: hidden;
-      will-change: transform, opacity, filter;
-      backface-visibility: hidden;
+      will-change: transform;
     }
     .card video {
       width: 100%; height: 100%;
@@ -151,6 +147,96 @@
     .card-2 { width: 38vw; aspect-ratio: 16/9; }
     .card-3 { width: 28vw; aspect-ratio: 16/9; }
     .card-4 { width: 16vw; aspect-ratio: 9/16; }
+
+    /* Layer 2: radial veil — brighter core, near-solid white edges */
+    .hero-veil {
+      position: absolute; inset: 0;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255,255,255,0.45) 0%,
+        rgba(255,255,255,0.8) 42%,
+        rgba(255,255,255,0.97) 72%,
+        #ffffff 100%
+      );
+      pointer-events: none;
+      will-change: opacity;
+    }
+
+    /* Layer 3: vinyl — wrap handles scale, img handles rotation */
+    .vinyl-wrap {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 58vmin; height: 58vmin;
+      will-change: transform;
+      pointer-events: none;
+      /* expanding center hole: scroll grows --hole so the camera appears
+         to pass through the vinyl's hole (the PNG's real hole is tiny) */
+      --hole: 1%;
+      -webkit-mask-image: radial-gradient(circle farthest-side at 50% 50%,
+        transparent calc(var(--hole) - 0.5%), #000 var(--hole));
+      mask-image: radial-gradient(circle farthest-side at 50% 50%,
+        transparent calc(var(--hole) - 0.5%), #000 var(--hole));
+    }
+    .vinyl-disc {
+      position: absolute;
+      left: 50%; top: 50%;
+      height: 100%; width: auto;
+      will-change: transform;
+    }
+    /* Layer 4: static gloss — the disc spins underneath it */
+    .vinyl-gloss {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.32) 0%,
+        rgba(255,255,255,0.06) 30%,
+        transparent 48%,
+        transparent 62%,
+        rgba(255,255,255,0.12) 100%
+      );
+    }
+
+    /* Corner texts (fade out early in the scroll) */
+    .hero-corner-title {
+      position: absolute;
+      left: 48px; bottom: 44px;
+      font-size: clamp(22px, 2.6vw, 38px);
+      font-weight: 400;
+      color: #0a0a0a;
+      line-height: 1.3;
+      z-index: 3;
+    }
+    .hero-corner-scroll {
+      position: absolute;
+      right: 48px; bottom: 52px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(10,10,10,0.45);
+      z-index: 3;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-corner-scroll::after {
+      content: '';
+      width: 1px; height: 32px;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.4), transparent);
+      animation: vPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes vPulse {
+      0%,100% { opacity: 0.35; transform: scaleY(1); }
+      50%      { opacity: 1;    transform: scaleY(1.12); }
+    }
+
+    /* Nav on the white hero: scoped variable override, flips back to the
+       dark theme automatically once the hero turns dark */
+    nav.on-light {
+      --ink: #0a0a0a;
+      --ink-mid: #555555;
+      --ink-light: #8a8a8a;
+      --border: rgba(0,0,0,0.1);
+      --nav-bg: rgba(255,255,255,0.85);
+    }
 
     /* ── LAYOUT EDIT MODE ── */
     body.edit-mode .card { cursor: grab; outline: 1px dashed rgba(255,255,255,0.4); }
@@ -176,29 +262,6 @@
       cursor: pointer;
     }
     .edit-hud button:hover { opacity: 0.85; }
-
-    /* Scroll hint */
-    .hero-scroll-hint {
-      position: absolute; bottom: 32px; left: 50%;
-      transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      pointer-events: none; z-index: 2;
-      transition: opacity 0.4s;
-    }
-    .hero-scroll-hint.hidden { opacity: 0; }
-    .hero-scroll-hint span {
-      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: rgba(255,255,255,0.22);
-    }
-    .scroll-line-v {
-      width: 1px; height: 40px;
-      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3));
-      animation: vPulse 2.2s ease-in-out infinite;
-    }
-    @keyframes vPulse {
-      0%,100% { opacity: 0.3; transform: scaleY(1) translateY(0); }
-      50%      { opacity: 0.9; transform: scaleY(1.1) translateY(4px); }
-    }
 
     /* ── DIVIDER ── */
     .section-divider { height: 1px; background: var(--border); margin: 0; }
@@ -460,9 +523,28 @@
       <video src="https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/hero/herovideo-04.mp4" autoplay muted loop playsinline></video>
     </div>
   </div>
-  <div class="hero-scroll-hint" id="scrollHint">
-    <div class="scroll-line-v"></div>
-    <span>Scroll</span>
+
+  <!-- Layer 2: radial veil -->
+  <div class="hero-veil" id="heroVeil"></div>
+
+  <!-- Layer 3+4: vinyl (wrap scales, disc rotates, gloss static) -->
+  <div class="vinyl-wrap" id="vinylWrap">
+    <img class="vinyl-disc" id="vinylDisc"
+         src="https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/hero/herocover.png"
+         alt="Triston Li — vinyl">
+    <div class="vinyl-gloss"></div>
+  </div>
+
+  <!-- Corner texts -->
+  <h1 class="hero-corner-title hero-corner-fade">
+    <span data-lang="zh-hans">与品牌共同生长</span>
+    <span data-lang="zh-hant">與品牌共同生長</span>
+    <span data-lang="en">Growing with every brand</span>
+  </h1>
+  <div class="hero-corner-scroll hero-corner-fade">
+    <span data-lang="zh-hans">向下滚动</span>
+    <span data-lang="zh-hant">向下滾動</span>
+    <span data-lang="en">Scroll</span>
   </div>
 </section>
 
@@ -624,88 +706,70 @@
   gsap.ticker.add(time => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
 
-  /* ── HERO CARDS · 3D DEPTH TUNNEL ── */
-  /* Cards travel along the z-axis: far (small, dark) → center plane (bright) → past camera (dark).
-     No rotation — all cards stay perfectly horizontal. */
+  /* ── HERO · VINYL REVEAL ── */
+  /* Static staggered video collage behind a radial white veil and a
+     centered vinyl. Scroll (pinned) spins + scales the vinyl, fades the
+     veil, then darkens the stage to hand off to the black work section. */
   const cards = gsap.utils.toArray('.card');
 
-  const Z_FAR   = -3200;  // deepest point of the tunnel
-  const Z_END   =   700;  // past the camera
-  const Z_PEAK  =     0;  // brightest at the center plane
-
-  /* Scattered x/y offsets (vw/vh fractions) — perspective spreads them as z grows.
-     zStart staggers cards along the tunnel (non-linear gaps read deeper);
-     deeper cards get LARGER lateral offsets so their projected positions
-     stay clearly apart instead of clustering at the vanishing point. */
+  /* Scattered x/y offsets from screen center (vw/vh fractions) */
   const CARD_POS = [
-    { x:  0.13, y: -0.10, zStart:  -350 },
-    { x: -0.20, y: -0.34, zStart: -1050 },
-    { x:  0.30, y: -0.40, zStart: -2000 },
-    { x: -0.48, y:  0.18, zStart: -3200 },
+    { x:  0.24, y: -0.20 },
+    { x: -0.26, y: -0.22 },
+    { x:  0.20, y:  0.24 },
+    { x: -0.24, y:  0.22 },
   ];
 
-  function lightFor(z) {
-    /* brightness: dark at far, 1.0 at center plane, dark again past camera.
-       Gentler curve (t^1.4) keeps mid-depth cards distinguishable from the
-       deepest ones instead of both reading as equally dim. */
-    if (z <= Z_PEAK) {
-      const t = (z - Z_FAR) / (Z_PEAK - Z_FAR);        // 0 → 1
-      return { bright: 0.08 + 0.92 * Math.pow(t, 1.4), alpha: Math.min(1, t * 2.2) };
-    } else {
-      const t = (z - Z_PEAK) / (Z_END - Z_PEAK);       // 0 → 1
-      return { bright: Math.max(0.05, 1 - t * 1.35), alpha: Math.max(0, 1 - t * 1.5) };
-    }
-  }
-
-  function applyLight(card) {
-    const z = gsap.getProperty(card, 'z');
-    const { bright, alpha } = lightFor(z);
-    card.style.filter = `brightness(${bright.toFixed(3)})`;
-    card.style.opacity = alpha.toFixed(3);
-  }
-
-  let heroTl;
-  function initHero() {
-    if (heroTl) heroTl.kill();
+  function layoutCards() {
     const W = window.innerWidth, H = window.innerHeight;
-
     cards.forEach((card, i) => {
       gsap.set(card, {
         xPercent: -50, yPercent: -50,
         x: W * CARD_POS[i].x,
         y: H * CARD_POS[i].y,
-        z: CARD_POS[i].zStart,
-        rotation: 0,
       });
-      applyLight(card);
     });
+  }
+
+  let heroTl;
+  function initHero() {
+    if (heroTl) heroTl.kill();
+    layoutCards();
+
+    /* reset animated layers (matters on resize rebuild) */
+    gsap.set('#vinylWrap', { xPercent: -50, yPercent: -50, scale: 1, '--hole': '1%' });
+    gsap.set('#vinylDisc', { xPercent: -50, yPercent: -50, rotation: 0 });
+    gsap.set('#heroVeil', { opacity: 1 });
+    gsap.set('#heroStage', { backgroundColor: '#ffffff' });
+    gsap.set('.hero-corner-fade', { opacity: 1, y: 0 });
 
     heroTl = gsap.timeline();
-    /* All cards fly toward the camera together; deeper cards travel farther,
-       so each passes the bright center plane at a different scroll moment. */
-    cards.forEach((card, i) => {
-      heroTl.to(card, {
-        z: Z_END,
-        ease: 'none',
-        duration: 1,
-        onUpdate: () => applyLight(card),
-      }, 0);
-    });
+    heroTl.to('#vinylDisc', { rotation: 720, ease: 'none', duration: 1 }, 0);           // spin
+    heroTl.to('#vinylWrap', { scale: 4.2, ease: 'power1.in', duration: 1 }, 0);         // grow
+    heroTl.to('#heroVeil', { opacity: 0, ease: 'none', duration: 0.75 }, 0.1);          // brighten
+    heroTl.to('.hero-corner-fade', { opacity: 0, y: -20, ease: 'power1.out', duration: 0.25 }, 0.06);
+    heroTl.to('#vinylWrap', { '--hole': '95%', ease: 'power1.in', duration: 0.5 }, 0.5); // hole opens, camera passes through
+    heroTl.to('#heroStage', { backgroundColor: '#0a0a0a', ease: 'none', duration: 0.3 }, 0.55);
     return heroTl;
   }
 
+  const mainNavEl = document.getElementById('mainNav');
   function createHeroTriggers() {
     ScrollTrigger.create({
       trigger: '#heroStage',
       start: 'top top',
-      end: '+=320%',
+      end: '+=300%',
       pin: true,
       scrub: 1.2,
       animation: initHero(),
       onUpdate: self => {
-        document.getElementById('scrollHint').classList.toggle('hidden', self.progress > 0.04);
+        /* nav is light while the hero is still white, dark once the stage darkens */
+        mainNavEl.classList.toggle('on-light', self.isActive && self.progress < 0.68);
       },
+      onLeave:     () => mainNavEl.classList.remove('on-light'),
+      onLeaveBack: () => mainNavEl.classList.add('on-light'),
     });
+    mainNavEl.classList.add('on-light');
   }
 
   createHeroTriggers();
@@ -945,7 +1009,7 @@
     document.getElementById('hudValues').textContent =
       'const CARD_POS = [\n' +
       CARD_POS.map(p =>
-        `  { x: ${p.x.toFixed(2).padStart(5)}, y: ${p.y.toFixed(2).padStart(5)}, zStart: ${p.zStart} },`
+        `  { x: ${p.x.toFixed(2).padStart(5)}, y: ${p.y.toFixed(2).padStart(5)} },`
       ).join('\n') +
       '\n];';
   }
@@ -963,17 +1027,11 @@
     lenis.stop();
     ScrollTrigger.getAll().forEach(t => t.kill());
     if (heroTl) heroTl.kill();
-    const W = window.innerWidth, H = window.innerHeight;
-    cards.forEach((card, i) => {
-      gsap.set(card, {
-        xPercent: -50, yPercent: -50,
-        x: W * CARD_POS[i].x,
-        y: H * CARD_POS[i].y,
-        z: 0, rotation: 0,
-      });
-      card.style.filter = 'brightness(1)';
-      card.style.opacity = '1';
-    });
+    layoutCards();
+    /* hide the vinyl/veil so the cards are fully visible while placing them */
+    gsap.set('#heroVeil', { opacity: 0 });
+    gsap.set('#vinylWrap', { scale: 1, opacity: 0 });
+    gsap.set('#heroStage', { backgroundColor: '#0a0a0a' });
     document.body.classList.add('edit-mode');
     renderHud();
   }
@@ -981,6 +1039,7 @@
   function exitEditMode() {
     editMode = false;
     document.body.classList.remove('edit-mode');
+    gsap.set('#vinylWrap', { opacity: 1 });
     lenis.start();
     createHeroTriggers();
     ScrollTrigger.refresh();
