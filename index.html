@@ -705,6 +705,10 @@
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add(time => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
+  /* pin spacers change the page height after Lenis measures it —
+     re-measure whenever ScrollTrigger refreshes, or scrolling gets clamped */
+  ScrollTrigger.addEventListener('refresh', () => lenis.resize());
+  window.addEventListener('load', () => ScrollTrigger.refresh());
 
   /* ── HERO · VINYL REVEAL ── */
   /* Static staggered video collage behind a radial white veil and a
@@ -712,12 +716,15 @@
      veil, then darkens the stage to hand off to the black work section. */
   const cards = gsap.utils.toArray('.card');
 
-  /* Scattered x/y offsets from screen center (vw/vh fractions) */
+  /* Scattered x/y offsets from screen center (vw/vh fractions).
+     drift = how far each card floats UP during the pinned scroll
+     (fraction of viewport height) — different speeds give the layered
+     parallax feel. */
   const CARD_POS = [
-    { x:  0.24, y: -0.20 },
-    { x: -0.26, y: -0.22 },
-    { x:  0.20, y:  0.24 },
-    { x: -0.24, y:  0.22 },
+    { x:  0.24, y: -0.20, drift: 0.30 },
+    { x: -0.26, y: -0.22, drift: 0.16 },
+    { x:  0.20, y:  0.24, drift: 0.52 },
+    { x: -0.24, y:  0.22, drift: 0.38 },
   ];
 
   function layoutCards() {
@@ -744,6 +751,11 @@
     gsap.set('.hero-corner-fade', { opacity: 1, y: 0 });
 
     heroTl = gsap.timeline();
+    /* layered parallax: each card floats up at its own speed for the whole pin */
+    const H = window.innerHeight;
+    cards.forEach((card, i) => {
+      heroTl.to(card, { y: `-=${H * CARD_POS[i].drift}`, ease: 'none', duration: 1 }, 0);
+    });
     heroTl.to('#vinylDisc', { rotation: 720, ease: 'none', duration: 1 }, 0);           // spin
     heroTl.to('#vinylWrap', { scale: 4.2, ease: 'power1.in', duration: 1 }, 0);         // grow
     heroTl.to('#heroVeil', { opacity: 0, ease: 'none', duration: 0.75 }, 0.1);          // brighten
