@@ -727,14 +727,18 @@
      coefficient — mixed signs make layers drift in opposite directions. */
   const UNIT = 20;            // px per world unit
   const PERSPECTIVE = 900;    // must match .hero-cards CSS perspective
-  const DOLLY = 620;          // camera travel into the corridor in phase B (px)
+  const DOLLY = 700;          // camera travel into the corridor in phase B (px)
+  const SPREAD = 2.3;         // how far the compact cluster fans out in phase B
   const depthComp = d => (PERSPECTIVE + Math.abs(d * UNIT)) / PERSPECTIVE;
 
+  /* start COMPACT around the center; phase B fans them out by SPREAD
+     while the camera dollies in, then they fade out completely before
+     the work section arrives */
   const CARD_POS = [
-    { x:  0.24, y: -0.20, depth: -16, sway:  2.5 },   // nearest
-    { x: -0.26, y: -0.22, depth: -30, sway: -1.8 },
-    { x:  0.20, y:  0.24, depth: -44, sway:  3.0 },
-    { x: -0.24, y:  0.22, depth: -58, sway: -1.4 },   // farthest
+    { x:  0.12, y: -0.11, depth: -16, sway:  2.5 },   // nearest
+    { x: -0.13, y: -0.12, depth: -30, sway: -1.8 },
+    { x:  0.10, y:  0.13, depth: -44, sway:  3.0 },
+    { x: -0.12, y:  0.12, depth: -58, sway: -1.4 },   // farthest
   ];
 
   function layoutCards() {
@@ -750,6 +754,7 @@
         y: H * p.y * f,
         z: p.depth * UNIT,
         scale: f,
+        opacity: 1,
       });
     });
   }
@@ -778,24 +783,27 @@
     cards.forEach(card => {
       heroTl.to(card, { filter: 'blur(0px)', ease: 'none', duration: 0.5 }, 0.05);       // focus in
     });
-    /* hole opens only to mid-dilation and HOLDS — the vinyl stays as a
-       frame while the planes continue their depth parallax behind it */
-    heroTl.to('#vinylWrap', { '--hole': '55%', ease: 'power1.in', duration: 0.3 }, 0.3);
+    /* hole opens fully — the vinyl clears the screen completely */
+    heroTl.to('#vinylWrap', { '--hole': '95%', ease: 'power1.in', duration: 0.32 }, 0.3);
     heroTl.to('#heroStage', { backgroundColor: '#0a0a0a', ease: 'none', duration: 0.15 }, 0.45);
 
-    /* ── Phase B (≈0.58 → end): vinyl freezes, camera dollies INTO the
-       corridor. Every card advances the same world distance, so near
-       planes sweep past fast while far ones glide — true dolly parallax.
-       sway adds opposite-signed lateral drift per layer. */
+    /* ── Phase B (≈0.58 → end): vinyl clears, camera dollies INTO the
+       corridor while the compact cluster FANS OUT. Near planes sweep past
+       fast, far ones glide; sway adds opposite-signed lateral drift.
+       Finally every card fades out so the work section arrives clean. */
+    const W = window.innerWidth, VH = window.innerHeight;
     cards.forEach((card, i) => {
       const p = CARD_POS[i];
+      const f = depthComp(p.depth);
       heroTl.to(card, {
         z: `+=${DOLLY}`,
-        y: `-=${p.sway * 40 * depthComp(p.depth)}`,
+        x: W * p.x * f * SPREAD,
+        y: VH * p.y * f * SPREAD - p.sway * 40 * f,
         ease: 'power1.in',
-        duration: 0.38,
+        duration: 0.42,
       }, 0.58);
     });
+    heroTl.to(cards, { opacity: 0, ease: 'power1.in', duration: 0.16 }, 0.92);
 
     return heroTl;
   }
