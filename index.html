@@ -727,18 +727,18 @@
      coefficient — mixed signs make layers drift in opposite directions. */
   const UNIT = 20;            // px per world unit
   const PERSPECTIVE = 900;    // must match .hero-cards CSS perspective
-  const DOLLY = 700;          // camera travel into the corridor in phase B (px)
-  const SPREAD = 2.3;         // how far the compact cluster fans out in phase B
   const depthComp = d => (PERSPECTIVE + Math.abs(d * UNIT)) / PERSPECTIVE;
 
-  /* start COMPACT around the center; phase B fans them out by SPREAD
-     while the camera dollies in, then they fade out completely before
-     the work section arrives */
+  /* start COMPACT around the center. Phase B is a PURE z-axis dolly —
+     no lateral retargeting: as each card nears the camera, perspective
+     alone enlarges it and pushes its projection outward, which reads as
+     true depth (the 13-Jul tunnel feel). Cards fade out one by one in
+     depth order as they pass the camera. */
   const CARD_POS = [
-    { x:  0.12, y: -0.11, depth: -16, sway:  2.5 },   // nearest
-    { x: -0.13, y: -0.12, depth: -30, sway: -1.8 },
-    { x:  0.10, y:  0.13, depth: -44, sway:  3.0 },
-    { x: -0.12, y:  0.12, depth: -58, sway: -1.4 },   // farthest
+    { x:  0.12, y: -0.11, depth: -16 },   // nearest — passes first
+    { x: -0.13, y: -0.12, depth: -30 },
+    { x:  0.10, y:  0.13, depth: -44 },
+    { x: -0.12, y:  0.12, depth: -58 },   // farthest
   ];
 
   function layoutCards() {
@@ -788,22 +788,26 @@
     heroTl.to('#heroStage', { backgroundColor: '#0a0a0a', ease: 'none', duration: 0.15 }, 0.45);
 
     /* ── Phase B (≈0.58 → end): vinyl clears, camera dollies INTO the
-       corridor while the compact cluster FANS OUT. Near planes sweep past
-       fast, far ones glide; sway adds opposite-signed lateral drift.
-       Finally every card fades out so the work section arrives clean. */
-    const W = window.innerWidth, VH = window.innerHeight;
+       corridor — pure z motion at ONE shared speed. Every card travels
+       all the way PAST the camera plane (EXIT_Z), so near ones sweep by
+       first and the farthest exits last; each fades out right as it
+       crosses. The work section arrives only after the last one is gone. */
+    const EXIT_Z = 550;                                        // past the camera
+    const SPEED = (EXIT_Z - CARD_POS[0].depth * UNIT) / 0.42;  // px per timeline unit
     cards.forEach((card, i) => {
-      const p = CARD_POS[i];
-      const f = depthComp(p.depth);
+      const travel = EXIT_Z - CARD_POS[i].depth * UNIT;
+      const dur = travel / SPEED;
       heroTl.to(card, {
-        z: `+=${DOLLY}`,
-        x: W * p.x * f * SPREAD,
-        y: VH * p.y * f * SPREAD - p.sway * 40 * f,
+        z: EXIT_Z,
         ease: 'power1.in',
-        duration: 0.42,
+        duration: dur,
       }, 0.58);
+      heroTl.to(card, {
+        opacity: 0,
+        ease: 'power1.out',
+        duration: 0.12,
+      }, 0.58 + dur - 0.12);
     });
-    heroTl.to(cards, { opacity: 0, ease: 'power1.in', duration: 0.16 }, 0.92);
 
     return heroTl;
   }
