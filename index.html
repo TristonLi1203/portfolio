@@ -720,27 +720,36 @@
      veil, then darkens the stage to hand off to the black work section. */
   const cards = gsap.utils.toArray('.card');
 
-  /* Scattered x/y offsets from screen center (vw/vh fractions).
-     Phase B (after the vinyl finishes): each card flies toward the camera
-     along the z-axis — approach = translateZ distance (px, perspective 900),
-     rise = upward travel (viewport-height fraction). Different values +
-     staggered starts give the layered tunnel feel. */
+  /* Deep-Z corridor, ported from podium.global's measured scene:
+     planes staggered 10–15 world units apart along Z, scattered on X/Y,
+     with far planes SCALED UP so distance reads as parallax, not "small".
+     depth = world units (1 unit ≈ 20px); sway = per-card parallax
+     coefficient — mixed signs make layers drift in opposite directions. */
+  const UNIT = 20;            // px per world unit
+  const PERSPECTIVE = 900;    // must match .hero-cards CSS perspective
+  const DOLLY = 620;          // camera travel into the corridor in phase B (px)
+  const depthComp = d => (PERSPECTIVE + Math.abs(d * UNIT)) / PERSPECTIVE;
+
   const CARD_POS = [
-    { x:  0.24, y: -0.20, rise: 0.18, approach: 420 },
-    { x: -0.26, y: -0.22, rise: 0.12, approach: 300 },
-    { x:  0.20, y:  0.24, rise: 0.25, approach: 560 },
-    { x: -0.24, y:  0.22, rise: 0.20, approach: 480 },
+    { x:  0.24, y: -0.20, depth: -16, sway:  2.5 },   // nearest
+    { x: -0.26, y: -0.22, depth: -30, sway: -1.8 },
+    { x:  0.20, y:  0.24, depth: -44, sway:  3.0 },
+    { x: -0.24, y:  0.22, depth: -58, sway: -1.4 },   // farthest
   ];
 
   function layoutCards() {
     const W = window.innerWidth, H = window.innerHeight;
     cards.forEach((card, i) => {
+      const p = CARD_POS[i];
+      const f = depthComp(p.depth);
+      /* x/y/scale multiplied by the depth factor so every card PROJECTS
+         at its authored screen position/size, while sitting at real depth */
       gsap.set(card, {
         xPercent: -50, yPercent: -50,
-        x: W * CARD_POS[i].x,
-        y: H * CARD_POS[i].y,
-        z: 0,
-        scale: 1,
+        x: W * p.x * f,
+        y: H * p.y * f,
+        z: p.depth * UNIT,
+        scale: f,
       });
     });
   }
@@ -756,7 +765,7 @@
     gsap.set('#heroVeil', { opacity: 1 });
     gsap.set('#heroStage', { backgroundColor: '#ffffff' });
     gsap.set('.hero-corner-fade', { opacity: 1, y: 0 });
-    gsap.set(cards, { filter: 'blur(16px)' });
+    gsap.set(cards, { filter: 'blur(8px)' });
 
     heroTl = gsap.timeline();
 
@@ -769,20 +778,23 @@
     cards.forEach(card => {
       heroTl.to(card, { filter: 'blur(0px)', ease: 'none', duration: 0.5 }, 0.05);       // focus in
     });
-    heroTl.to('#vinylWrap', { '--hole': '95%', ease: 'power1.in', duration: 0.3 }, 0.3); // hole opens
+    /* hole opens only to mid-dilation and HOLDS — the vinyl stays as a
+       frame while the planes continue their depth parallax behind it */
+    heroTl.to('#vinylWrap', { '--hole': '55%', ease: 'power1.in', duration: 0.3 }, 0.3);
     heroTl.to('#heroStage', { backgroundColor: '#0a0a0a', ease: 'none', duration: 0.15 }, 0.45);
 
-    /* ── Phase B (≈0.58 → end): vinyl freezes, cards fly toward the camera ──
-       translateZ under the container's 900px perspective — the old tunnel
-       depth feel. Staggered starts, per-card distance and rise. */
-    const H = window.innerHeight;
+    /* ── Phase B (≈0.58 → end): vinyl freezes, camera dollies INTO the
+       corridor. Every card advances the same world distance, so near
+       planes sweep past fast while far ones glide — true dolly parallax.
+       sway adds opposite-signed lateral drift per layer. */
     cards.forEach((card, i) => {
+      const p = CARD_POS[i];
       heroTl.to(card, {
-        z: CARD_POS[i].approach,
-        y: `-=${H * CARD_POS[i].rise}`,
+        z: `+=${DOLLY}`,
+        y: `-=${p.sway * 40 * depthComp(p.depth)}`,
         ease: 'power1.in',
-        duration: 0.34,
-      }, 0.58 + i * 0.06);
+        duration: 0.38,
+      }, 0.58);
     });
 
     return heroTl;
@@ -1103,11 +1115,14 @@
 
   document.addEventListener('mousemove', e => {
     if (!dragCard) return;
-    const nx = startX + (e.clientX - startMx);
-    const ny = startY + (e.clientY - startMy);
+    const f = depthComp(CARD_POS[dragIdx].depth);
+    /* mouse deltas are screen px; the card sits at depth, so its local
+       movement is amplified by the depth factor to track the cursor */
+    const nx = startX + (e.clientX - startMx) * f;
+    const ny = startY + (e.clientY - startMy) * f;
     gsap.set(dragCard, { x: nx, y: ny });
-    CARD_POS[dragIdx].x = +(nx / window.innerWidth).toFixed(3);
-    CARD_POS[dragIdx].y = +(ny / window.innerHeight).toFixed(3);
+    CARD_POS[dragIdx].x = +(nx / (window.innerWidth * f)).toFixed(3);
+    CARD_POS[dragIdx].y = +(ny / (window.innerHeight * f)).toFixed(3);
     renderHud();
   });
 
