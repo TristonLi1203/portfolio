@@ -130,14 +130,18 @@
       overflow: hidden;
     }
 
-    .hero-cards { position: absolute; inset: 0; }
+    .hero-cards {
+      position: absolute; inset: 0;
+      perspective: 900px;
+      perspective-origin: 50% 50%;
+    }
 
     .card {
       position: absolute;
       top: 50%; left: 50%;
       border-radius: 3px;
       overflow: hidden;
-      will-change: transform;
+      will-change: transform, filter;
     }
     .card video {
       width: 100%; height: 100%;
@@ -717,14 +721,15 @@
   const cards = gsap.utils.toArray('.card');
 
   /* Scattered x/y offsets from screen center (vw/vh fractions).
-     drift = how far each card floats UP during the pinned scroll
-     (fraction of viewport height) — different speeds give the layered
-     parallax feel. */
+     Phase B (after the vinyl finishes): each card flies toward the camera
+     along the z-axis — approach = translateZ distance (px, perspective 900),
+     rise = upward travel (viewport-height fraction). Different values +
+     staggered starts give the layered tunnel feel. */
   const CARD_POS = [
-    { x:  0.24, y: -0.20, drift: 0.30 },
-    { x: -0.26, y: -0.22, drift: 0.16 },
-    { x:  0.20, y:  0.24, drift: 0.52 },
-    { x: -0.24, y:  0.22, drift: 0.38 },
+    { x:  0.24, y: -0.20, rise: 0.18, approach: 420 },
+    { x: -0.26, y: -0.22, rise: 0.12, approach: 300 },
+    { x:  0.20, y:  0.24, rise: 0.25, approach: 560 },
+    { x: -0.24, y:  0.22, rise: 0.20, approach: 480 },
   ];
 
   function layoutCards() {
@@ -734,6 +739,8 @@
         xPercent: -50, yPercent: -50,
         x: W * CARD_POS[i].x,
         y: H * CARD_POS[i].y,
+        z: 0,
+        scale: 1,
       });
     });
   }
@@ -749,19 +756,35 @@
     gsap.set('#heroVeil', { opacity: 1 });
     gsap.set('#heroStage', { backgroundColor: '#ffffff' });
     gsap.set('.hero-corner-fade', { opacity: 1, y: 0 });
+    gsap.set(cards, { filter: 'blur(16px)' });
 
     heroTl = gsap.timeline();
-    /* layered parallax: each card floats up at its own speed for the whole pin */
+
+    /* ── Phase A (0 → 0.6): the vinyl performs; the videos hold still,
+       blurred at first and sharpening as the vinyl advances ── */
+    heroTl.to('#vinylDisc', { rotation: 720, ease: 'none', duration: 0.6 }, 0);          // spin
+    heroTl.to('#vinylWrap', { scale: 4.2, ease: 'power1.in', duration: 0.6 }, 0);        // grow
+    heroTl.to('#heroVeil', { opacity: 0, ease: 'none', duration: 0.45 }, 0.05);          // brighten
+    heroTl.to('.hero-corner-fade', { opacity: 0, y: -20, ease: 'power1.out', duration: 0.2 }, 0.05);
+    cards.forEach(card => {
+      heroTl.to(card, { filter: 'blur(0px)', ease: 'none', duration: 0.5 }, 0.05);       // focus in
+    });
+    heroTl.to('#vinylWrap', { '--hole': '95%', ease: 'power1.in', duration: 0.3 }, 0.3); // hole opens
+    heroTl.to('#heroStage', { backgroundColor: '#0a0a0a', ease: 'none', duration: 0.15 }, 0.45);
+
+    /* ── Phase B (≈0.58 → end): vinyl freezes, cards fly toward the camera ──
+       translateZ under the container's 900px perspective — the old tunnel
+       depth feel. Staggered starts, per-card distance and rise. */
     const H = window.innerHeight;
     cards.forEach((card, i) => {
-      heroTl.to(card, { y: `-=${H * CARD_POS[i].drift}`, ease: 'none', duration: 1 }, 0);
+      heroTl.to(card, {
+        z: CARD_POS[i].approach,
+        y: `-=${H * CARD_POS[i].rise}`,
+        ease: 'power1.in',
+        duration: 0.34,
+      }, 0.58 + i * 0.06);
     });
-    heroTl.to('#vinylDisc', { rotation: 720, ease: 'none', duration: 1 }, 0);           // spin
-    heroTl.to('#vinylWrap', { scale: 4.2, ease: 'power1.in', duration: 1 }, 0);         // grow
-    heroTl.to('#heroVeil', { opacity: 0, ease: 'none', duration: 0.75 }, 0.1);          // brighten
-    heroTl.to('.hero-corner-fade', { opacity: 0, y: -20, ease: 'power1.out', duration: 0.25 }, 0.06);
-    heroTl.to('#vinylWrap', { '--hole': '95%', ease: 'power1.in', duration: 0.5 }, 0.5); // hole opens, camera passes through
-    heroTl.to('#heroStage', { backgroundColor: '#0a0a0a', ease: 'none', duration: 0.3 }, 0.55);
+
     return heroTl;
   }
 
@@ -1040,7 +1063,8 @@
     ScrollTrigger.getAll().forEach(t => t.kill());
     if (heroTl) heroTl.kill();
     layoutCards();
-    /* hide the vinyl/veil so the cards are fully visible while placing them */
+    /* hide the vinyl/veil/blur so the cards are fully visible while placing them */
+    gsap.set(cards, { filter: 'none' });
     gsap.set('#heroVeil', { opacity: 0 });
     gsap.set('#vinylWrap', { scale: 1, opacity: 0 });
     gsap.set('#heroStage', { backgroundColor: '#0a0a0a' });
