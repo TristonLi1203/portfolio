@@ -247,25 +247,56 @@
       line-height: 1.3;
       z-index: 3;
     }
+    /* Scroll cue: centered at the bottom, bobbing arrow + label.
+       Sits in its own lane so it never collides with the headline. */
     .hero-corner-scroll {
       position: absolute;
-      right: 48px; bottom: 52px;
-      font-size: 11px;
-      letter-spacing: 0.18em;
+      left: 50%; bottom: 34px;
+      transform: translateX(-50%);
+      z-index: 4;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      font-size: 12px;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(10,10,10,0.45);
-      z-index: 3;
-      display: flex; align-items: center; gap: 10px;
+      color: rgba(10,10,10,0.62);
+      pointer-events: none;
+      animation: cueBob 2.4s ease-in-out infinite;
     }
-    .hero-corner-scroll::after {
-      content: '';
-      width: 1px; height: 32px;
-      background: linear-gradient(to bottom, rgba(10,10,10,0.4), transparent);
-      animation: vPulse 2.2s ease-in-out infinite;
+    .hero-corner-scroll .cue-arrow {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(10,10,10,0.28);
+      display: flex; align-items: center; justify-content: center;
     }
-    @keyframes vPulse {
-      0%,100% { opacity: 0.35; transform: scaleY(1); }
-      50%      { opacity: 1;    transform: scaleY(1.12); }
+    .hero-corner-scroll .cue-arrow svg { display: block; }
+    @keyframes cueBob {
+      0%, 100% { transform: translateX(-50%) translateY(0);   opacity: 0.72; }
+      50%      { transform: translateX(-50%) translateY(9px); opacity: 1; }
+    }
+
+    /* Persistent hint while the videos are on screen */
+    .scroll-nudge {
+      position: fixed;
+      left: 50%; bottom: 26px;
+      transform: translateX(-50%);
+      z-index: 150;
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.82);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .scroll-nudge svg { animation: nudgeBob 1.8s ease-in-out infinite; }
+    @keyframes nudgeBob {
+      0%, 100% { transform: translateY(-2px); }
+      50%      { transform: translateY(3px); }
     }
 
     /* Nav on the white hero: scoped variable override, flips back to the
@@ -441,20 +472,38 @@
       color: var(--ink-mid);
     }
 
-    /* ── ABOUT ── */
-    .about-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); }
-    .about-left { padding: 80px 48px; border-right: 1px solid var(--border); }
-    .about-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 32px; }
-    .about-headline { font-size: clamp(32px,3.5vw,52px); font-weight: 400; line-height: 1.1; margin-bottom: 32px; }
-    .about-headline em { font-style: italic; color: var(--ink-mid); }
-    .about-body { font-size: 15px; color: var(--ink-mid); line-height: 1.85; font-weight: 300; max-width: 420px; }
-    .about-right { padding: 80px 48px; display: flex; flex-direction: column; justify-content: space-between; }
-    .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 48px; }
-    .stat-number { font-size: 48px; font-weight: 400; line-height: 1; margin-bottom: 6px; }
-    .stat-desc { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-light); }
-    .skills-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 16px; }
-    .skills-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .skill-tag { font-size: 12px; padding: 6px 14px; border: 1px solid var(--border); color: var(--ink-mid); }
+    /* ── ABOUT ME ── */
+    .about-section {
+      border-top: 1px solid var(--border);
+      padding: 110px 48px 120px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .about-label {
+      font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--ink-light); margin-bottom: 44px;
+    }
+    .about-headline {
+      font-size: clamp(30px, 4vw, 56px);
+      font-weight: 400; line-height: 1.22;
+      margin-bottom: 56px;
+      max-width: 16em;
+    }
+    .about-headline em { font-style: normal; color: var(--ink-mid); }
+    .about-prose {
+      max-width: 34em;
+      --prose-dim: #d0d0d0;   /* 未读到 */
+      --prose-lit: #171717;   /* 已读到 */
+    }
+    .about-prose p {
+      font-size: clamp(15px, 1.25vw, 17px);
+      color: var(--prose-dim);
+      line-height: 1.95;
+      font-weight: 300;
+    }
+    .about-prose p + p { margin-top: 1.6em; }
+    /* 逐词着色的载体：必须是 inline（非 inline-block），换行才与未拆分时完全一致 */
+    .about-prose .w { display: inline; color: inherit; }
 
     /* ── CONTACT ── */
     .contact-section { background: var(--bg); padding: 80px 48px; }
@@ -500,12 +549,37 @@
       .card-2 { width: 72vw; }
       .card-3 { width: 58vw; }
       .card-4 { width: 40vw; }
-      .brands-section, .work-section, .about-left, .about-right { padding: 48px 20px; }
-      .about-section { grid-template-columns: 1fr; }
-      .about-left { border-right: none; border-bottom: 1px solid var(--border); }
+      .brands-section, .work-section { padding: 48px 20px; }
+      .about-section { padding: 72px 20px 80px; }
+      .about-label { margin-bottom: 28px; }
+      .about-headline { margin-bottom: 36px; }
       .contact-section { padding: 48px 20px; }
       .contact-top { flex-direction: column; gap: 40px; }
       footer { padding: 20px; }
+      /* headline gets its own row above the centered scroll cue */
+      .hero-corner-title {
+        left: 20px; right: 20px;
+        bottom: 116px;
+        font-size: clamp(26px, 7.4vw, 40px);
+      }
+      .hero-corner-scroll { bottom: 40px; }
+      .work-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .work-title { font-size: 32px; }
+      .contact-row { flex-wrap: wrap; gap: 4px 12px; }
+      .contact-platform { width: auto; }
+      footer { flex-direction: column; gap: 6px; }
+    }
+
+    @media (max-width: 480px) {
+      .brands-section, .work-section { padding: 40px 16px; }
+      .about-section { padding: 64px 16px 72px; }
+      .contact-section { padding: 40px 16px; }
+      .manifesto-section { padding: 18vh 20px; }
+      .manifesto-headline { font-size: clamp(26px, 7.6vw, 34px); }
+      .about-headline { font-size: clamp(26px, 7.4vw, 34px); }
+      .contact-headline { font-size: clamp(30px, 8.6vw, 44px); }
+      .work-grid { gap: 16px; }
+      .work-col { gap: 16px; }
     }
   </style>
 </head>
@@ -582,11 +656,28 @@
     <span data-lang="en">Growing with every brand</span>
   </h1>
   <div class="hero-corner-scroll hero-corner-fade">
+    <span class="cue-arrow">
+      <svg width="13" height="15" viewBox="0 0 13 15" fill="none" aria-hidden="true">
+        <path d="M6.5 1v12M1.6 8.4l4.9 4.9 4.9-4.9" stroke="currentColor" stroke-width="1.3"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
     <span data-lang="zh-hans">向下滚动</span>
     <span data-lang="zh-hant">向下滾動</span>
     <span data-lang="en">Scroll</span>
   </div>
 </section>
+
+<!-- Persistent scroll hint shown while the hero video reveal is on screen -->
+<div class="scroll-nudge" id="scrollNudge">
+  <svg width="11" height="13" viewBox="0 0 13 15" fill="none" aria-hidden="true">
+    <path d="M6.5 1v12M1.6 8.4l4.9 4.9 4.9-4.9" stroke="currentColor" stroke-width="1.4"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span data-lang="zh-hans">继续滚动</span>
+  <span data-lang="zh-hant">繼續滾動</span>
+  <span data-lang="en">Keep scrolling</span>
+</div>
 
 <!-- Layout edit HUD (press E to toggle) -->
 <div class="edit-hud" id="editHud">
@@ -636,46 +727,41 @@
 </section>
 
 <!-- ABOUT -->
-<div class="about-section" id="about">
-  <div class="about-left">
-    <p class="about-label">
-      <span data-lang="zh-hans">关于</span>
-      <span data-lang="zh-hant">關於</span>
-      <span data-lang="en">About</span>
+<!-- ═══════════════════════════════════════════════════════════
+     ABOUT ME · 个人简介
+     ↓ 想改文字就改下面这些 <span> 里的内容（简/繁/英三份）
+     ═══════════════════════════════════════════════════════════ -->
+<section class="about-section" id="about">
+  <p class="about-label">
+    <span data-lang="zh-hans">关于我</span>
+    <span data-lang="zh-hant">關於我</span>
+    <span data-lang="en">About Me</span>
+  </p>
+
+  <h2 class="about-headline">
+    <span data-lang="zh-hans">剪辑不只是技术，<em>是判断力。</em></span>
+    <span data-lang="zh-hant">剪輯不只是技術，<em>是判斷力。</em></span>
+    <span data-lang="en">Editing isn't just technique — <em>it's judgment.</em></span>
+  </h2>
+
+  <div class="about-prose">
+    <p>
+      <span data-lang="zh-hans">我是李天天，一名视频剪辑师。从帮朋友剪第一支短片开始，到现在为运动、时尚、生活方式品牌做内容，我一直在做同一件事——把散落的素材，剪成一段有呼吸的故事。</span>
+      <span data-lang="zh-hant">我是李天天，一名視頻剪輯師。從幫朋友剪第一支短片開始，到現在為運動、時尚、生活方式品牌做內容，我一直在做同一件事——把散落的素材，剪成一段有呼吸的故事。</span>
+      <span data-lang="en">I'm Triston Li, a video editor. From cutting a short film for a friend to making content for sports, fashion and lifestyle brands, I've been doing the same thing all along — turning scattered footage into a story that breathes.</span>
     </p>
-    <h2 class="about-headline">
-      <span data-lang="zh-hans">剪辑不只是<br>技术，<em>是判断力。</em></span>
-      <span data-lang="zh-hant">剪輯不只是<br>技術，<em>是判斷力。</em></span>
-      <span data-lang="en">Editing isn't just<br>technique, <em>it's judgment.</em></span>
-    </h2>
-    <p class="about-body">
-      <span data-lang="zh-hans">自由剪辑师，4年行业经验，曾就职于乙方制作公司，现独立接单。专注品牌视频内容，擅长在节奏与情绪之间找到准确的落点。相信好的剪辑是帮助一段素材找到它本该有的重量。</span>
-      <span data-lang="zh-hant">自由剪輯師，4年行業經驗，曾任職於乙方製作公司，現獨立接案。專注品牌視頻內容，擅長在節奏與情緒之間找到準確的落點。</span>
-      <span data-lang="en">Freelance video editor with 4 years of experience, formerly at a production agency, now working independently. Focused on brand video content, with a strong sense for pacing and emotional rhythm.</span>
+    <p>
+      <span data-lang="zh-hans">我在意节奏。一个镜头多停留半秒，情绪就完全不同。所以我很少一次剪完就交片，通常会放两天，再回来重新听一遍它的呼吸。</span>
+      <span data-lang="zh-hant">我在意節奏。一個鏡頭多停留半秒，情緒就完全不同。所以我很少一次剪完就交片，通常會放兩天，再回來重新聽一遍它的呼吸。</span>
+      <span data-lang="en">I care about rhythm. Half a second longer on a shot changes everything about how it feels. So I rarely deliver a first cut — I let it sit for a couple of days, then come back and listen to it again.</span>
+    </p>
+    <p>
+      <span data-lang="zh-hans">如果你有一个项目，不确定该怎么讲，欢迎找我聊聊。我喜欢在剪辑之前，先弄明白它到底想说什么。</span>
+      <span data-lang="zh-hant">如果你有一個項目，不確定該怎麼講，歡迎找我聊聊。我喜歡在剪輯之前，先弄明白它到底想說什麼。</span>
+      <span data-lang="en">If you have a project and aren't sure how to tell it, let's talk. I like to understand what a piece is trying to say before I start cutting.</span>
     </p>
   </div>
-  <div class="about-right">
-    <div class="about-stats">
-      <div class="stat-block">
-        <div class="stat-number">4+</div>
-        <div class="stat-desc"><span data-lang="zh-hans">年经验</span><span data-lang="zh-hant">年經驗</span><span data-lang="en">Years</span></div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-number">30+</div>
-        <div class="stat-desc"><span data-lang="zh-hans">完成项目</span><span data-lang="zh-hant">完成項目</span><span data-lang="en">Projects</span></div>
-      </div>
-    </div>
-    <div class="skills-block">
-      <p class="skills-label"><span data-lang="zh-hans">工具</span><span data-lang="zh-hant">工具</span><span data-lang="en">Tools</span></p>
-      <div class="skills-list">
-        <span class="skill-tag">Final Cut Pro</span>
-        <span class="skill-tag">After Effects</span>
-        <span class="skill-tag">DaVinci Resolve</span>
-        <span class="skill-tag">Premiere Pro</span>
-      </div>
-    </div>
-  </div>
-</div>
+</section>
 
 <!-- CONTACT -->
 <section class="contact-section" id="contact">
@@ -860,9 +946,16 @@
       onUpdate: self => {
         /* nav is light while the hero is still white, dark once the stage darkens */
         mainNavEl.classList.toggle('on-light', self.isActive && self.progress < 0.68);
+        /* keep nudging while the videos are revealed, so nobody thinks
+           the vinyl/cards are click targets */
+        const p = self.progress;
+        gsap.to('#scrollNudge', {
+          opacity: self.isActive && p > 0.22 && p < 0.9 ? 1 : 0,
+          duration: 0.35, overwrite: true,
+        });
       },
-      onLeave:     () => mainNavEl.classList.remove('on-light'),
-      onLeaveBack: () => mainNavEl.classList.add('on-light'),
+      onLeave:     () => { mainNavEl.classList.remove('on-light'); gsap.to('#scrollNudge', { opacity: 0, duration: 0.3, overwrite: true }); },
+      onLeaveBack: () => { mainNavEl.classList.add('on-light');    gsap.to('#scrollNudge', { opacity: 0, duration: 0.3, overwrite: true }); },
     });
     mainNavEl.classList.add('on-light');
   }
@@ -999,6 +1092,12 @@
       y: 60, opacity: 0, duration: 1, ease: 'power2.out',
       scrollTrigger: { trigger: '.manifesto-headline', start: 'top 85%', once: true },
     });
+
+    /* about: 标签 → 大标题（正文交给逐词滚动变色，见 createAboutReveal）*/
+    gsap.from('.about-label, .about-headline', {
+      y: 34, opacity: 0, duration: 0.85, ease: 'power2.out', stagger: 0.12,
+      scrollTrigger: { trigger: '#about', start: 'top 78%', once: true },
+    });
   }
 
   createInvertTrigger();
@@ -1093,6 +1192,7 @@
       createHeroTriggers();
       buildWorkGrid();
       createInvertTrigger();
+      createAboutReveal();
       ScrollTrigger.refresh();
     }, 200);
   });
@@ -1243,6 +1343,77 @@
       if (!e.target.closest('.lang')) sw.classList.remove('lang--opened');
     });
   })();
+
+  /* ── ABOUT · 逐词滚动变色 ──
+     正文按词拆成 <span class="w">（中文按单字，这是中文场景下"词"的等价单位），
+     再用 ScrollTrigger scrub 把滚动进度映射到一条 stagger 时间线上：
+     颜色由 --prose-dim 实时插值到 --prose-lit，形成自上而下的"阅读波"，
+     向上滚会平滑退回。scrub 负责插值，因此无需逐帧测量每个词的位置。 */
+  const CJK = '一-鿿㐀-䶿　-〿＀-￯';
+  const WORD_TOKEN = new RegExp('[' + CJK + ']|[^\\s' + CJK + ']+|\\s+', 'g');
+  let aboutSplit = false;
+
+  /* 只包裹文本节点，空白原样插回（英文才能继续在空格处换行） */
+  function splitIntoWords(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const texts = [];
+    let n;
+    while ((n = walker.nextNode())) texts.push(n);
+    texts.forEach(t => {
+      const frag = document.createDocumentFragment();
+      (t.nodeValue.match(WORD_TOKEN) || []).forEach(tok => {
+        if (/^\s+$/.test(tok)) {
+          frag.appendChild(document.createTextNode(tok));
+        } else {
+          const w = document.createElement('span');
+          w.className = 'w';
+          w.textContent = tok;
+          frag.appendChild(w);
+        }
+      });
+      t.parentNode.replaceChild(frag, t);
+    });
+  }
+
+  function createAboutReveal() {
+    const prose = document.querySelector('.about-prose');
+    if (!prose) return;
+
+    /* 只拆当前语言那一份：切语言是整页跳转，不存在页内切换。
+       若三份都拆，波形会被稀释成只走 1/3。 */
+    if (!aboutSplit) {
+      const lang = (document.body.className.match(/lang-([\w-]+)/) || [, 'en'])[1];
+      prose.querySelectorAll('p > span[data-lang="' + lang + '"]').forEach(splitIntoWords);
+      aboutSplit = true;
+    }
+
+    const words = prose.querySelectorAll('.w');
+    if (!words.length) return;
+
+    /* 波形宽度 = 每词时长 : 词间错开。比值越大，同时处于过渡中的词越多、
+       渐变带越柔和。43 取自 theperformancelab.ca（600ms 时长 / 14ms 错开）。
+       EACH 由词数反推，保证最后一个词恰好在进度 1.0 收尾。 */
+    const WAVE = 43;
+    const EACH = 1 / (1 + (words.length - 1) / WAVE);
+    const step = EACH / WAVE;
+    const lit = getComputedStyle(prose).getPropertyValue('--prose-lit').trim() || '#171717';
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: prose,
+        start: 'top 80%',
+        end: 'bottom 55%',
+        scrub: 0.6,
+      },
+    }).to(words, {
+      color: lit,
+      ease: 'expo.out',   /* ≈ cubic-bezier(.16,1,.3,1)，同参考站：入场即亮、尾段缓收 */
+      duration: EACH,
+      stagger: step,
+    });
+  }
+
+  createAboutReveal();
 
 </script>
 </body>
