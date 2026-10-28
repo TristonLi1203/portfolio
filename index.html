@@ -177,7 +177,6 @@
       top: 50%; left: 50%;
       border-radius: 3px;
       overflow: hidden;
-      will-change: transform, filter;
     }
     .card video {
       width: 100%; height: 100%;
@@ -187,6 +186,14 @@
     .card-2 { width: 38vw; aspect-ratio: 16/9; }
     .card-3 { width: 28vw; aspect-ratio: 16/9; }
     .card-4 { width: 16vw; aspect-ratio: 9/16; }
+
+    /* 图层提升只在动画激活期间生效：Hero 滚过后 7 个图层立即释放显存。
+       规则 6 — use will-change temporarily and surgically */
+    .hero-stage.is-animating .card       { will-change: transform, filter; }
+    .hero-stage.is-animating .hero-veil  { will-change: opacity; }
+    .hero-stage.is-animating .vinyl-wrap { will-change: transform; }
+    .hero-stage.is-animating .vinyl-disc { will-change: transform; }
+    .brand-cloud.is-spinning .brand-tag  { will-change: transform, opacity; }
 
     /* Layer 2: radial veil — brighter core, near-solid white edges */
     .hero-veil {
@@ -199,7 +206,6 @@
         #ffffff 100%
       );
       pointer-events: none;
-      will-change: opacity;
     }
 
     /* Layer 3: vinyl — wrap handles scale, img handles rotation */
@@ -207,7 +213,6 @@
       position: absolute;
       left: 50%; top: 50%;
       width: 58vmin; height: 58vmin;
-      will-change: transform;
       pointer-events: none;
       /* expanding center hole: scroll grows --hole so the camera appears
          to pass through the vinyl's hole (the PNG's real hole is tiny) */
@@ -221,7 +226,6 @@
       position: absolute;
       left: 50%; top: 50%;
       height: 100%; width: auto;
-      will-change: transform;
     }
     /* Layer 4: static gloss — the disc spins underneath it */
     .vinyl-gloss {
@@ -260,8 +264,11 @@
       text-transform: uppercase;
       color: rgba(10,10,10,0.62);
       pointer-events: none;
+      /* 规则 4 — pause animations when off-screen；默认暂停，Hero 激活才跑 */
       animation: cueBob 2.4s ease-in-out infinite;
+      animation-play-state: paused;
     }
+    .hero-stage.is-animating .hero-corner-scroll { animation-play-state: running; }
     .hero-corner-scroll .cue-arrow {
       width: 30px; height: 30px;
       border-radius: 50%;
@@ -293,7 +300,11 @@
       opacity: 0;
       pointer-events: none;
     }
-    .scroll-nudge svg { animation: nudgeBob 1.8s ease-in-out infinite; }
+    .scroll-nudge svg {
+      animation: nudgeBob 1.8s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+    .scroll-nudge.is-visible svg { animation-play-state: running; }
     @keyframes nudgeBob {
       0%, 100% { transform: translateY(-2px); }
       50%      { transform: translateY(3px); }
@@ -355,7 +366,6 @@
       position: absolute;
       left: 50%; top: 50%;
       user-select: none;
-      will-change: transform, opacity;
       pointer-events: none;
     }
     .brand-tag img {
@@ -935,29 +945,43 @@
   }
 
   const mainNavEl = document.getElementById('mainNav');
+  const heroStageEl = document.getElementById('heroStage');
+  const scrollNudgeEl = document.getElementById('scrollNudge');
+
+  function hideNudge() {
+    gsap.to(scrollNudgeEl, { opacity: 0, duration: 0.3, overwrite: true });
+    scrollNudgeEl.classList.remove('is-visible');
+  }
+
   function createHeroTriggers() {
-    ScrollTrigger.create({
+    const heroST = ScrollTrigger.create({
       trigger: '#heroStage',
       start: 'top top',
       end: '+=300%',
       pin: true,
       scrub: 1.2,
       animation: initHero(),
+      /* .is-animating gates both layer promotion and the looping cue:
+         off the hero, neither costs anything */
+      onToggle: self => heroStageEl.classList.toggle('is-animating', self.isActive),
       onUpdate: self => {
         /* nav is light while the hero is still white, dark once the stage darkens */
         mainNavEl.classList.toggle('on-light', self.isActive && self.progress < 0.68);
         /* keep nudging while the videos are revealed, so nobody thinks
            the vinyl/cards are click targets */
         const p = self.progress;
-        gsap.to('#scrollNudge', {
-          opacity: self.isActive && p > 0.22 && p < 0.9 ? 1 : 0,
-          duration: 0.35, overwrite: true,
-        });
+        const show = self.isActive && p > 0.22 && p < 0.9;
+        gsap.to(scrollNudgeEl, { opacity: show ? 1 : 0, duration: 0.35, overwrite: true });
+        scrollNudgeEl.classList.toggle('is-visible', show);
       },
-      onLeave:     () => { mainNavEl.classList.remove('on-light'); gsap.to('#scrollNudge', { opacity: 0, duration: 0.3, overwrite: true }); },
-      onLeaveBack: () => { mainNavEl.classList.add('on-light');    gsap.to('#scrollNudge', { opacity: 0, duration: 0.3, overwrite: true }); },
+      onLeave:     () => { mainNavEl.classList.remove('on-light'); hideNudge(); },
+      onLeaveBack: () => { mainNavEl.classList.add('on-light');    hideNudge(); },
     });
-    mainNavEl.classList.add('on-light');
+    /* 按触发器的真实状态同步，不能无条件添加：
+       resize 会重建触发器，此时用户可能早已滚过 Hero，
+       而 refresh() 不会为"状态未变化"触发 onToggle。 */
+    mainNavEl.classList.toggle('on-light', heroST.isActive && heroST.progress < 0.68);
+    heroStageEl.classList.toggle('is-animating', heroST.isActive);
   }
 
   createHeroTriggers();
@@ -1155,7 +1179,36 @@
     });
     box.parentElement.addEventListener('mouseleave', () => { tx = 0.0022; ty = 0.0009; });
 
+    /* 规则 1 — rAF 必须有停止条件；规则 4 — 离屏即暂停。
+       只有品牌云进入视口才转动，离开立即取消，避免永久空转耗电。 */
+    let rafId = 0, running = false;
+
+    function start() {
+      if (running) return;
+      running = true;
+      box.classList.add('is-spinning');      /* 此时才提升图层 */
+      rafId = requestAnimationFrame(tick);
+    }
+    function stop() {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(rafId);
+      box.classList.remove('is-spinning');   /* 释放图层 */
+    }
+
+    new IntersectionObserver(
+      ([e]) => (e.isIntersecting ? start() : stop()),
+      { rootMargin: '200px' }
+    ).observe(box);
+
+    /* 标签页切到后台时也停（visibilitychange 比 rAF 节流更可靠） */
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else if (box.getBoundingClientRect().top < innerHeight + 200) start();
+    });
+
     function tick() {
+      if (!running) return;
       vx += (tx - vx) * 0.04;
       vy += (ty - vy) * 0.04;
       const R = Math.min(W, H) * 0.42;
@@ -1177,9 +1230,9 @@
         p.el.style.opacity = (0.18 + 0.82 * depth).toFixed(3);
         p.el.style.zIndex = Math.round(depth * 100);
       });
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     }
-    tick();
+    /* 不在此处直接 tick()：由 IntersectionObserver 决定何时开始 */
   })();
 
   /* Recompute on resize */
