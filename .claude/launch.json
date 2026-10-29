@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "portfolio",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3456", "--bind", "127.0.0.1", "--directory", "/Volumes/小蓝/作品集整理/portfolio-repo"],
+      "port": 3456
+    }
+  ]
+}

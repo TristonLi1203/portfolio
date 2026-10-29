@@ -1,0 +1,60 @@
+/* ══════════════════════════════════════════════════════════════════════
+   MOTION SYSTEM · 缓动曲线 + 入场动画
+   ──────────────────────────────────────────────────────────────────────
+   节奏/视差/跟随系数在 motion.js 顶部的 MOTION 对象里调。
+   下面这些是 CSS 侧的默认值——motion.js 会用 MOTION 覆盖它们，
+   但这里保留一份同值兜底，所以 JS 挂不上时页面依然正常显示。
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── 四条缓动曲线 ── */
+  --ease-out-expo:     cubic-bezier(0.16, 1, 0.3, 1);    /* 主曲线：入场动画 */
+  --ease-out:          cubic-bezier(0, 0, 0.2, 1);       /* hover 缩放 0.3–0.7s */
+  --ease-in-out:       cubic-bezier(0.4, 0, 0.2, 1);     /* 小型 UI 淡入淡出 0.2–0.5s */
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);   /* 页面级转场、大块遮罩 */
+
+  /* ── 入场动画（JS 会用 MOTION.reveal 覆盖）── */
+  --m-rise: 40px;             /* 初始下沉距离 */
+  --m-dur-opacity: 0.5s;      /* 透明度过渡：快 */
+  --m-dur-transform: 1.05s;   /* 位移过渡：慢 → "先显形、再减速落定" */
+}
+
+/* ══ 入场动画 ══
+   opacity 与 transform 用同一条曲线但**不同时长**，这正是 podium 的手感来源：
+   元素先快速显形，再用两倍时长缓缓落定。
+   --m-delay 由 JS 按同批次内的次序写入，形成 stagger。 */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--m-rise));
+  transition:
+    opacity   var(--m-dur-opacity)   var(--ease-out-expo) var(--m-delay, 0s),
+    transform var(--m-dur-transform) var(--ease-out-expo) var(--m-delay, 0s);
+}
+
+/* 图层提升只在过渡期间存在，过渡一结束 JS 立刻摘掉这个 class */
+[data-reveal].is-animating {
+  will-change: opacity, transform;
+}
+
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ══ prefers-reduced-motion ══
+   入场只保留淡入（去掉位移），循环动画停掉，长过渡压短。
+   平滑滚动与视差在 motion.js 里按同一个查询关掉。 */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    transform: none;
+    transition: opacity 0.3s var(--ease-in-out) var(--m-delay, 0s);
+  }
+  [data-reveal].is-in { transform: none; }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important;
+    scroll-behavior: auto !important;
+  }
+}

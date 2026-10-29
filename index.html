@@ -8,6 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="preload" href="fonts/Nohemi-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/Nohemi-Medium.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- 动效系统：缓动变量 + 入场动画。必须同步放在 head，
+       因为入场元素初始是 opacity:0，这个文件晚到一帧就会闪一下 -->
+  <link rel="stylesheet" href="motion.css">
   <style>
     /* ── Nohemi: latin only, so CJK falls through to Noto Sans SC ── */
     @font-face {
@@ -102,7 +105,7 @@
       text-decoration: none;
       color: var(--ink-light);
       white-space: nowrap;
-      transition: color 0.15s, background 0.15s;
+      transition: color 0.2s var(--ease-in-out), background 0.2s var(--ease-in-out);
     }
     .lang-item.is-current {
       display: inline-flex;
@@ -116,7 +119,7 @@
       border-right: 3.5px solid transparent;
       border-top: 4.5px solid currentColor;
       opacity: 0.45;
-      transition: transform 0.2s;
+      transition: transform 0.25s var(--ease-in-out);
     }
     .lang--opened .lang-item { display: inline-flex; }
     .lang--opened .lang-item.is-current::after { transform: rotate(180deg); }
@@ -131,7 +134,8 @@
     .hamburger-btn span {
       display: block; width: 20px; height: 1.5px;
       background: var(--ink);
-      transition: transform 0.25s, opacity 0.25s; transform-origin: center;
+      transition: transform 0.25s var(--ease-in-out), opacity 0.25s var(--ease-in-out);
+      transform-origin: center;
     }
     .hamburger-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
     .hamburger-btn.open span:nth-child(2) { opacity: 0; }
@@ -150,7 +154,8 @@
       padding: 18px 24px; font-size: 12px;
       letter-spacing: 0.08em; text-transform: uppercase;
       color: var(--ink); text-decoration: none;
-      border-bottom: 1px solid var(--border); transition: background 0.15s;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s var(--ease-in-out);
     }
     .hamburger-menu a:last-child { border-bottom: none; }
     .hamburger-menu a:hover { background: rgba(255,255,255,0.04); }
@@ -409,25 +414,33 @@
       border-radius: 3px;
       background: #151515;
     }
-    .thumb-fill { position: absolute; inset: 0; transition: transform 0.5s ease; }
+    .thumb-fill { position: absolute; inset: 0; transition: transform 0.6s var(--ease-out); }
     .work-card:hover .thumb-fill { transform: scale(1.04); }
     .thumb-img {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      transition: transform 0.5s ease;
+      transition: transform 0.6s var(--ease-out);
     }
     .work-card:hover .thumb-img { transform: scale(1.04); }
 
     /* ── LIGHTBOX PLAYER ── */
+    /* 大块遮罩用 --ease-in-out-quint：起落都慢、中段快，像一道闸门。
+       用 visibility 而不是 display:none，才能做淡入淡出；
+       hidden 状态下它既不可见也不接收点击。 */
     .lightbox {
       position: fixed; inset: 0; z-index: 600;
       background: rgba(0,0,0,0.93);
-      display: none;
+      display: flex;
       align-items: center; justify-content: center;
       padding: 5vh 5vw;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.5s var(--ease-in-out-quint),
+        visibility 0.5s var(--ease-in-out-quint);
     }
-    .lightbox.open { display: flex; }
+    .lightbox.open { opacity: 1; visibility: visible; }
     .lightbox video {
       max-width: 100%; max-height: 100%;
       background: #000;
@@ -438,14 +451,14 @@
       font-size: 30px; line-height: 1;
       color: rgba(255,255,255,0.6);
       background: none; border: none; cursor: pointer;
-      transition: color 0.2s;
+      transition: color 0.2s var(--ease-in-out);
       z-index: 601;
     }
     .lightbox-close:hover { color: #fff; }
     .work-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
-      opacity: 0; transition: opacity 0.3s;
+      opacity: 0; transition: opacity 0.3s var(--ease-in-out);
       display: flex; align-items: flex-end; padding: 20px;
     }
     .work-card:hover .work-overlay { opacity: 1; }
@@ -528,7 +541,7 @@
     .contact-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 18px 0; border-bottom: 1px solid var(--border);
-      text-decoration: none; transition: opacity 0.2s;
+      text-decoration: none; transition: opacity 0.25s var(--ease-in-out);
     }
     .contact-row:first-child { border-top: 1px solid var(--border); }
     .contact-row:hover { opacity: 0.6; }
@@ -699,12 +712,12 @@
 <!-- WORK -->
 <section class="work-section" id="work">
   <div class="work-header">
-    <h2 class="work-title">
+    <h2 class="work-title" data-reveal>
       <span data-lang="zh-hans">作品</span>
       <span data-lang="zh-hant">作品</span>
       <span data-lang="en">Work</span>
     </h2>
-    <span class="work-subtitle">Selected Works</span>
+    <span class="work-subtitle" data-reveal>Selected Works</span>
   </div>
 
   <div class="work-grid" id="workGrid"></div>
@@ -714,7 +727,7 @@
 
 <!-- BRANDS -->
 <section class="brands-section" id="brands">
-  <p class="brands-label">
+  <p class="brands-label" data-reveal>
     <span data-lang="zh-hans">合作品牌</span>
     <span data-lang="zh-hant">合作品牌</span>
     <span data-lang="en">Selected Clients</span>
@@ -724,12 +737,12 @@
 
 <!-- MANIFESTO -->
 <section class="manifesto-section" id="manifesto">
-  <p class="manifesto-eyebrow">
+  <p class="manifesto-eyebrow" data-reveal>
     <span data-lang="zh-hans">理念</span>
     <span data-lang="zh-hant">理念</span>
     <span data-lang="en">Philosophy</span>
   </p>
-  <h2 class="manifesto-headline">
+  <h2 class="manifesto-headline" data-reveal>
     <span data-lang="zh-hans">好的剪辑，<br>是让每一段素材<br><em>找到它本该有的重量。</em></span>
     <span data-lang="zh-hant">好的剪輯，<br>是讓每一段素材<br><em>找到它本該有的重量。</em></span>
     <span data-lang="en">Good editing gives footage<br><em>the weight it deserves.</em></span>
@@ -742,13 +755,13 @@
      ↓ 想改文字就改下面这些 <span> 里的内容（简/繁/英三份）
      ═══════════════════════════════════════════════════════════ -->
 <section class="about-section" id="about">
-  <p class="about-label">
+  <p class="about-label" data-reveal>
     <span data-lang="zh-hans">关于我</span>
     <span data-lang="zh-hant">關於我</span>
     <span data-lang="en">About Me</span>
   </p>
 
-  <h2 class="about-headline">
+  <h2 class="about-headline" data-reveal>
     <span data-lang="zh-hans">剪辑不只是技术，<em>是判断力。</em></span>
     <span data-lang="zh-hant">剪輯不只是技術，<em>是判斷力。</em></span>
     <span data-lang="en">Editing isn't just technique — <em>it's judgment.</em></span>
@@ -777,34 +790,34 @@
 <section class="contact-section" id="contact">
   <div class="contact-top">
     <div>
-      <p class="contact-eyebrow">
+      <p class="contact-eyebrow" data-reveal>
         <span data-lang="zh-hans">联系我</span>
         <span data-lang="zh-hant">聯絡我</span>
         <span data-lang="en">Get In Touch</span>
       </p>
-      <h2 class="contact-headline">
+      <h2 class="contact-headline" data-reveal>
         <span data-lang="zh-hans">有项目想聊？<br><em>随时欢迎。</em></span>
         <span data-lang="zh-hant">有項目想聊？<br><em>隨時歡迎。</em></span>
         <span data-lang="en">Have a project?<br><em>Let's talk.</em></span>
       </h2>
     </div>
     <div class="contact-links">
-      <a href="#" class="contact-row">
+      <a href="#" class="contact-row" data-reveal>
         <span class="contact-platform"><span data-lang="zh-hans">微信</span><span data-lang="zh-hant">微信</span><span data-lang="en">WeChat</span></span>
         <span class="contact-value">your_wechat_id</span>
         <span class="contact-arrow">↗</span>
       </a>
-      <a href="mailto:your@email.com" class="contact-row">
+      <a href="mailto:your@email.com" class="contact-row" data-reveal>
         <span class="contact-platform"><span data-lang="zh-hans">邮箱</span><span data-lang="zh-hant">電郵</span><span data-lang="en">Email</span></span>
         <span class="contact-value">your@email.com</span>
         <span class="contact-arrow">↗</span>
       </a>
-      <a href="#" class="contact-row">
+      <a href="#" class="contact-row" data-reveal>
         <span class="contact-platform"><span data-lang="zh-hans">小红书</span><span data-lang="zh-hant">小紅書</span><span data-lang="en">RED</span></span>
         <span class="contact-value">@yourhandle</span>
         <span class="contact-arrow">↗</span>
       </a>
-      <a href="#" class="contact-row">
+      <a href="#" class="contact-row" data-reveal>
         <span class="contact-platform">Instagram</span>
         <span class="contact-value">@yourhandle</span>
         <span class="contact-arrow">↗</span>
@@ -813,7 +826,7 @@
   </div>
 </section>
 
-<footer>
+<footer data-reveal>
   <span>© 2025 Triston Li · 李天天</span>
   <span>
     <span data-lang="zh-hans">视频剪辑师</span>
@@ -833,18 +846,17 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
+<!-- 动效系统：平滑滚动、入场动画、列视差、帧率无关 lerp。
+     调参集中在 motion.js 顶部的 MOTION 对象里 -->
+<script src="motion.js"></script>
+
 <script>
   gsap.registerPlugin(ScrollTrigger);
 
-  /* ── LENIS ── */
-  const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add(time => lenis.raf(time * 1000));
-  gsap.ticker.lagSmoothing(0);
-  /* pin spacers change the page height after Lenis measures it —
-     re-measure whenever ScrollTrigger refreshes, or scrolling gets clamped */
-  ScrollTrigger.addEventListener('refresh', () => lenis.resize());
-  window.addEventListener('load', () => ScrollTrigger.refresh());
+  /* ── LENIS ──
+     实例、ticker 接线、锚点接管都在 motion.js 里；
+     这里只取出来给灯箱和摆位模式用 */
+  const lenis = Motion.lenis;
 
   /* ── HERO · VINYL REVEAL ── */
   /* Static staggered video collage behind a radial white veil and a
@@ -1024,7 +1036,7 @@
     const thumb = w.poster
       ? `<img class="thumb-img" src="${w.poster}" alt="" loading="lazy">`
       : `<div class="thumb-fill" style="background:${w.color};"></div>`;
-    return `<div class="work-card" data-idx="${idx}">
+    return `<div class="work-card" data-idx="${idx}" data-reveal>
       <div class="work-thumb-box">
         ${thumb}
         <div class="work-overlay"><div class="overlay-play">${PLAY_SVG}</div></div>
@@ -1063,27 +1075,10 @@
       });
     });
 
-    /* reveal: rise from below + fade in as each card enters the viewport */
-    grid.querySelectorAll('.work-card').forEach(card => {
-      gsap.from(card, {
-        y: 56, opacity: 0, duration: 0.75, ease: 'power2.out',
-        scrollTrigger: { trigger: card, start: 'top 88%', once: true },
-      });
-    });
-
-    /* subtle per-column parallax (desktop only) —
-       identical drift for the even pair (2,4) so columns 1/3 and 2/4
-       each stay perfectly aligned while the two pairs slide past each other */
-    if (n === 4) {
-      const drift = [0, -30, 0, -30];
-      cols.forEach((col, i) => {
-        if (!drift[i]) return;
-        gsap.to(col, {
-          y: drift[i], ease: 'none',
-          scrollTrigger: { trigger: grid, start: 'top bottom', end: 'bottom top', scrub: true },
-        });
-      });
-    }
+    /* 列视差归动效系统管（见 motion.js）。卡片的入场不在这里登记：
+       pin spacer 的高度此刻还没算完，要等 ScrollTrigger.refresh() 之后
+       由调用方统一调 Motion.reveal()，否则会误判成"已可见"。 */
+    Motion.gridParallax(cols);
   }
 
   buildWorkGrid();
@@ -1110,18 +1105,8 @@
       '--nav-bg': 'rgba(255,255,255,0.85)',
       ease: 'none',
     });
-
-    /* manifesto headline drifts up as it fades in */
-    gsap.from('.manifesto-headline', {
-      y: 60, opacity: 0, duration: 1, ease: 'power2.out',
-      scrollTrigger: { trigger: '.manifesto-headline', start: 'top 85%', once: true },
-    });
-
-    /* about: 标签 → 大标题（正文交给逐词滚动变色，见 createAboutReveal）*/
-    gsap.from('.about-label, .about-headline', {
-      y: 34, opacity: 0, duration: 0.85, ease: 'power2.out', stagger: 0.12,
-      scrollTrigger: { trigger: '#about', start: 'top 78%', once: true },
-    });
+    /* 理念 / 关于我 的标题入场已统一交给 data-reveal（见 motion.js），
+       这里只留颜色反转。About 正文仍走逐词变色，见 createAboutReveal。 */
   }
 
   createInvertTrigger();
@@ -1169,19 +1154,27 @@
     new ResizeObserver(() => { W = box.clientWidth; H = box.clientHeight; }).observe(box);
 
     /* rotation velocity — defaults to slow drift, steered by hover */
-    let vx = 0.0022, vy = 0.0009, tx = vx, ty = vy;
-    box.parentElement.addEventListener('mousemove', e => {
-      const rect = box.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) / rect.width - 0.5;
-      const my = (e.clientY - rect.top) / rect.height - 0.5;
-      tx = mx * 0.012;
-      ty = -my * 0.012;
-    });
-    box.parentElement.addEventListener('mouseleave', () => { tx = 0.0022; ty = 0.0009; });
+    const DRIFT_X = 0.0022, DRIFT_Y = 0.0009;
+    const STEER = Motion.CONFIG.follow.cloudSteer;
+    const STICK = Motion.CONFIG.follow.cloudDrift;
+    let vx = DRIFT_X, vy = DRIFT_Y, tx = vx, ty = vy;
+
+    /* 只在真有鼠标的设备上接转向：触屏上 mousemove 要么不来，
+       要么是点击合成出来的一次假事件，绑了只会让转速莫名跳一下 */
+    if (Motion.canHover) {
+      box.parentElement.addEventListener('mousemove', e => {
+        const rect = box.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width - 0.5;
+        const my = (e.clientY - rect.top) / rect.height - 0.5;
+        tx = mx * STEER;
+        ty = -my * STEER;
+      });
+      box.parentElement.addEventListener('mouseleave', () => { tx = DRIFT_X; ty = DRIFT_Y; });
+    }
 
     /* 规则 1 — rAF 必须有停止条件；规则 4 — 离屏即暂停。
        只有品牌云进入视口才转动，离开立即取消，避免永久空转耗电。 */
-    let rafId = 0, running = false;
+    let rafId = 0, running = false, lastT = 0;
 
     function start() {
       if (running) return;
@@ -1192,6 +1185,7 @@
     function stop() {
       if (!running) return;
       running = false;
+      lastT = 0;                             /* 下次重启别拿陈旧时间戳算 dt */
       cancelAnimationFrame(rafId);
       box.classList.remove('is-spinning');   /* 释放图层 */
     }
@@ -1207,10 +1201,15 @@
       else if (box.getBoundingClientRect().top < innerHeight + 200) start();
     });
 
-    function tick() {
+    function tick(now) {
       if (!running) return;
-      vx += (tx - vx) * 0.04;
-      vy += (ty - vy) * 0.04;
+      /* 帧率无关：120Hz 屏上帧间隔只有一半，固定系数会让收敛快一倍，
+         所以按实际 dt 换算等效系数（见 Motion.lerpFactor） */
+      const dt = lastT ? now - lastT : 16.67;
+      lastT = now;
+      const k = Motion.lerpFactor(STICK, dt);
+      vx += (tx - vx) * k;
+      vy += (ty - vy) * k;
       const R = Math.min(W, H) * 0.42;
       const cx = Math.cos(vy), sx = Math.sin(vy);
       const cy = Math.cos(vx), sy = Math.sin(vx);
@@ -1247,6 +1246,8 @@
       createInvertTrigger();
       createAboutReveal();
       ScrollTrigger.refresh();
+      /* 必须在 refresh 之后：网格重建出的新卡片要按最终布局判断可见性 */
+      Motion.reveal();
     }, 200);
   });
 
@@ -1467,6 +1468,11 @@
   }
 
   createAboutReveal();
+
+  /* ── 入场动画总开关 ──
+     观察全页所有 [data-reveal]。作品卡在 buildWorkGrid 里已经登记过，
+     Motion.reveal 内部用 WeakSet 去重，重复调用无副作用。 */
+  Motion.reveal();
 
 </script>
 </body>
