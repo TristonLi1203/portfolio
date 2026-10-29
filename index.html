@@ -473,28 +473,6 @@
     .work-info-title { font-size: 14px; font-weight: 400; color: var(--ink); margin-bottom: 4px; }
     .work-info-meta { font-size: 12px; color: var(--ink-light); }
 
-    /* ── MANIFESTO ── */
-    .manifesto-section {
-      padding: 26vh 48px;
-      text-align: center;
-    }
-    .manifesto-eyebrow {
-      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--ink-light); margin-bottom: 40px;
-    }
-    .manifesto-headline {
-      font-size: clamp(34px, 4.6vw, 68px);
-      font-weight: 300;
-      line-height: 1.35;
-      max-width: 1000px;
-      margin: 0 auto;
-      color: var(--ink);
-    }
-    .manifesto-headline em {
-      font-style: normal;
-      color: var(--ink-mid);
-    }
-
     /* ── ABOUT ME ── */
     .about-section {
       border-top: 1px solid var(--border);
@@ -530,24 +508,27 @@
 
     /* ── CONTACT ── */
     .contact-section { background: var(--bg); padding: 80px 48px; }
+    /* 标题在上、联系方式在下（原先是左右分栏） */
     .contact-top {
-      display: flex; justify-content: space-between; align-items: flex-start;
+      display: flex; flex-direction: column; align-items: stretch;
+      gap: 56px;
       margin-bottom: 64px; padding-bottom: 32px; border-bottom: 1px solid var(--border);
     }
     .contact-eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 20px; }
     .contact-headline { font-size: clamp(40px,5vw,72px); color: var(--ink); font-weight: 400; line-height: 1.05; }
     .contact-headline em { font-style: italic; color: var(--ink-mid); }
-    .contact-links { display: flex; flex-direction: column; min-width: 280px; }
+    .contact-links { display: flex; flex-direction: column; }
     .contact-row {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
       padding: 18px 0; border-bottom: 1px solid var(--border);
       text-decoration: none; transition: opacity 0.25s var(--ease-in-out);
     }
     .contact-row:first-child { border-top: 1px solid var(--border); }
-    .contact-row:hover { opacity: 0.6; }
-    .contact-platform { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); width: 72px; }
+    /* 只有真能点的行才有 hover 反馈——微信号没有可跳转的地址 */
+    a.contact-row:hover { opacity: 0.6; }
+    /* 整行通栏后让标签吃掉富余空间，值和箭头靠右成列 */
+    .contact-platform { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); flex: 1; }
     .contact-value { font-size: 14px; color: var(--ink); }
-    .contact-arrow { color: var(--ink-light); font-size: 16px; }
 
     footer {
       background: var(--bg); border-top: 1px solid var(--border);
@@ -577,7 +558,7 @@
       .about-label { margin-bottom: 28px; }
       .about-headline { margin-bottom: 36px; }
       .contact-section { padding: 48px 20px; }
-      .contact-top { flex-direction: column; gap: 40px; }
+      .contact-top { gap: 40px; }   /* 方向已是纵向，窄屏只收紧间距 */
       footer { padding: 20px; }
       /* headline gets its own row above the centered scroll cue */
       .hero-corner-title {
@@ -597,8 +578,6 @@
       .brands-section, .work-section { padding: 40px 16px; }
       .about-section { padding: 64px 16px 72px; }
       .contact-section { padding: 40px 16px; }
-      .manifesto-section { padding: 18vh 20px; }
-      .manifesto-headline { font-size: clamp(26px, 7.6vw, 34px); }
       .about-headline { font-size: clamp(26px, 7.4vw, 34px); }
       .contact-headline { font-size: clamp(30px, 8.6vw, 44px); }
       .work-grid { gap: 16px; }
@@ -735,20 +714,6 @@
   <div class="brand-cloud" id="brandCloud"></div>
 </section>
 
-<!-- MANIFESTO -->
-<section class="manifesto-section" id="manifesto">
-  <p class="manifesto-eyebrow" data-reveal>
-    <span data-lang="zh-hans">理念</span>
-    <span data-lang="zh-hant">理念</span>
-    <span data-lang="en">Philosophy</span>
-  </p>
-  <h2 class="manifesto-headline" data-reveal>
-    <span data-lang="zh-hans">好的剪辑，<br>是让每一段素材<br><em>找到它本该有的重量。</em></span>
-    <span data-lang="zh-hant">好的剪輯，<br>是讓每一段素材<br><em>找到它本該有的重量。</em></span>
-    <span data-lang="en">Good editing gives footage<br><em>the weight it deserves.</em></span>
-  </h2>
-</section>
-
 <!-- ABOUT -->
 <!-- ═══════════════════════════════════════════════════════════
      ABOUT ME · 个人简介
@@ -802,25 +767,19 @@
       </h2>
     </div>
     <div class="contact-links">
-      <a href="#" class="contact-row" data-reveal>
+      <!-- 微信号没有可跳转的地址，所以这行不是链接，也不带箭头 -->
+      <div class="contact-row" data-reveal>
         <span class="contact-platform"><span data-lang="zh-hans">微信</span><span data-lang="zh-hant">微信</span><span data-lang="en">WeChat</span></span>
-        <span class="contact-value">your_wechat_id</span>
-        <span class="contact-arrow">↗</span>
-      </a>
-      <a href="mailto:your@email.com" class="contact-row" data-reveal>
+        <span class="contact-value">triston2018</span>
+      </div>
+      <a href="mailto:tientienli@outlook.com" class="contact-row" data-reveal>
         <span class="contact-platform"><span data-lang="zh-hans">邮箱</span><span data-lang="zh-hant">電郵</span><span data-lang="en">Email</span></span>
-        <span class="contact-value">your@email.com</span>
-        <span class="contact-arrow">↗</span>
+        <span class="contact-value">tientienli@outlook.com</span>
       </a>
-      <a href="#" class="contact-row" data-reveal>
-        <span class="contact-platform"><span data-lang="zh-hans">小红书</span><span data-lang="zh-hant">小紅書</span><span data-lang="en">RED</span></span>
-        <span class="contact-value">@yourhandle</span>
-        <span class="contact-arrow">↗</span>
-      </a>
-      <a href="#" class="contact-row" data-reveal>
-        <span class="contact-platform">Instagram</span>
-        <span class="contact-value">@yourhandle</span>
-        <span class="contact-arrow">↗</span>
+      <a href="https://www.xiaohongshu.com/user/profile/5fa14dbe0000000001008c3b"
+         class="contact-row" target="_blank" rel="noopener noreferrer" data-reveal>
+        <span class="contact-platform"><span data-lang="zh-hans">小红书</span><span data-lang="zh-hant">小紅書</span><span data-lang="en">Rednote</span></span>
+        <span class="contact-value">Triston</span>
       </a>
     </div>
   </div>
