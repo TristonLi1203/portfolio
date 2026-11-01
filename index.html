@@ -98,20 +98,46 @@
       overflow: hidden;
     }
     .lang-item {
-      display: none;
+      display: inline-flex;
       align-items: center; gap: 6px;
       padding: 6px 12px;
       font-size: 11px; letter-spacing: 0.05em;
       text-decoration: none;
       color: var(--ink-light);
       white-space: nowrap;
-      transition: color 0.2s var(--ease-in-out), background 0.2s var(--ease-in-out);
     }
     .lang-item.is-current {
-      display: inline-flex;
       color: var(--ink);
       font-weight: 500;
     }
+
+    /* 折叠：非当前语言收成 0 宽，而不是 display:none。
+       display 是离散属性，none ↔ inline-flex 之间没有中间态，
+       所以原来展开是"啪"地一下——这才是硬的原因。
+       改成宽度/内边距/透明度一起补间。这是导航里的小控件，
+       动布局的代价可忽略（规则 2：小而孤立的表面允许 layout 动画）。 */
+    .lang-item:not(.is-current) {
+      max-width: 0;
+      padding-left: 0; padding-right: 0;
+      opacity: 0;
+      border-left: 0 solid var(--border);
+      overflow: hidden;
+      transition:
+        max-width         0.44s var(--ease-out-expo),
+        padding           0.44s var(--ease-out-expo),
+        border-left-width 0.44s var(--ease-out-expo),
+        opacity           0.26s var(--ease-in-out),
+        color             0.2s  var(--ease-in-out);
+    }
+    .lang--opened .lang-item:not(.is-current) {
+      max-width: 5rem;
+      padding-left: 12px; padding-right: 12px;
+      opacity: 1;
+      border-left-width: 1px;
+    }
+    .lang-item:not(.is-current):hover { color: var(--ink); }
+
+    /* 三角跟着一起转，用同一条主曲线，收放才像一个动作 */
     .lang-item.is-current::after {
       content: '';
       width: 0; height: 0;
@@ -119,12 +145,11 @@
       border-right: 3.5px solid transparent;
       border-top: 4.5px solid currentColor;
       opacity: 0.45;
-      transition: transform 0.25s var(--ease-in-out);
+      transition:
+        transform 0.44s var(--ease-out-expo),
+        opacity   0.2s  var(--ease-in-out);
     }
-    .lang--opened .lang-item { display: inline-flex; }
-    .lang--opened .lang-item.is-current::after { transform: rotate(180deg); }
-    .lang--opened .lang-item:not(.is-current) { border-left: 1px solid var(--border); }
-    .lang-item:not(.is-current):hover { color: var(--ink); }
+    .lang--opened .lang-item.is-current::after { transform: rotate(180deg); opacity: 0.8; }
 
     .hamburger-btn {
       width: 36px; height: 36px;
@@ -546,11 +571,9 @@
     /* ── LANG ── */
     [data-lang] { display: none; }
     .lang-zh-hans [data-lang="zh-hans"] { display: block; }
-    .lang-zh-hant [data-lang="zh-hant"] { display: block; }
     .lang-en       [data-lang="en"]       { display: block; }
     span[data-lang], a[data-lang] { display: inline; }
     .lang-zh-hans span[data-lang]:not([data-lang="zh-hans"]) { display: none; }
-    .lang-zh-hant span[data-lang]:not([data-lang="zh-hant"]) { display: none; }
     .lang-en       span[data-lang]:not([data-lang="en"])       { display: none; }
 
     /* ── RESPONSIVE ── */
@@ -600,8 +623,7 @@
   <div class="nav-right">
     <div class="lang" id="langSwitch">
       <a class="lang-item" data-code="en" href="./">EN</a>
-      <a class="lang-item" data-code="zh-hans" href="?lang=zh-hans">简</a>
-      <a class="lang-item" data-code="zh-hant" href="?lang=zh-hant">繁</a>
+      <a class="lang-item" data-code="zh-hans" href="?lang=zh-hans">中</a>
     </div>
     <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
       <span></span><span></span><span></span>
@@ -610,21 +632,23 @@
 </nav>
 
 <div class="hamburger-menu" id="hamburgerMenu">
-  <a href="#brands" onclick="closeMenu()">
-    <span data-lang="zh-hans">合作品牌</span>
-    <span data-lang="zh-hant">合作品牌</span>
-    <span data-lang="en">Brands</span>
-    <span class="arrow">↗</span>
-  </a>
   <a href="#work" onclick="closeMenu()">
     <span data-lang="zh-hans">作品案例</span>
-    <span data-lang="zh-hant">作品案例</span>
     <span data-lang="en">Work</span>
+    <span class="arrow">↗</span>
+  </a>
+  <a href="#brands" onclick="closeMenu()">
+    <span data-lang="zh-hans">合作品牌</span>
+    <span data-lang="en">Clients</span>
+    <span class="arrow">↗</span>
+  </a>
+  <a href="#about" onclick="closeMenu()">
+    <span data-lang="zh-hans">关于我</span>
+    <span data-lang="en">About</span>
     <span class="arrow">↗</span>
   </a>
   <a href="#contact" onclick="closeMenu()">
     <span data-lang="zh-hans">联系方式</span>
-    <span data-lang="zh-hant">聯絡方式</span>
     <span data-lang="en">Contact</span>
     <span class="arrow">↗</span>
   </a>
@@ -661,8 +685,7 @@
   <!-- Corner texts -->
   <h1 class="hero-corner-title hero-corner-fade">
     <span data-lang="zh-hans">与品牌共同生长</span>
-    <span data-lang="zh-hant">與品牌共同生長</span>
-    <span data-lang="en">Growing with every brand</span>
+    <span data-lang="en">A Practice in Moving Images.</span>
   </h1>
   <div class="hero-corner-scroll hero-corner-fade">
     <span class="cue-arrow">
@@ -672,7 +695,6 @@
       </svg>
     </span>
     <span data-lang="zh-hans">向下滚动</span>
-    <span data-lang="zh-hant">向下滾動</span>
     <span data-lang="en">Scroll</span>
   </div>
 </section>
@@ -684,7 +706,6 @@
           stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
   <span data-lang="zh-hans">继续滚动</span>
-  <span data-lang="zh-hant">繼續滾動</span>
   <span data-lang="en">Keep scrolling</span>
 </div>
 
@@ -700,7 +721,6 @@
   <div class="work-header">
     <h2 class="work-title" data-reveal>
       <span data-lang="zh-hans">作品</span>
-      <span data-lang="zh-hant">作品</span>
       <span data-lang="en">Work</span>
     </h2>
     <span class="work-subtitle" data-reveal>Selected Works</span>
@@ -715,7 +735,6 @@
 <section class="brands-section" id="brands">
   <p class="brands-label" data-reveal>
     <span data-lang="zh-hans">合作品牌</span>
-    <span data-lang="zh-hant">合作品牌</span>
     <span data-lang="en">Selected Clients</span>
   </p>
   <div class="brand-cloud" id="brandCloud"></div>
@@ -729,31 +748,38 @@
 <section class="about-section" id="about">
   <p class="about-label" data-reveal>
     <span data-lang="zh-hans">关于我</span>
-    <span data-lang="zh-hant">關於我</span>
     <span data-lang="en">About Me</span>
   </p>
 
   <h2 class="about-headline" data-reveal>
-    <span data-lang="zh-hans">剪辑不只是技术，<em>是判断力。</em></span>
-    <span data-lang="zh-hant">剪輯不只是技術，<em>是判斷力。</em></span>
-    <span data-lang="en">Editing isn't just technique — <em>it's judgment.</em></span>
+    <span data-lang="zh-hans">让影像<em>拥有表达。</em></span>
+    <span data-lang="en">Making images <em>speak.</em></span>
   </h2>
 
   <div class="about-prose">
     <p>
-      <span data-lang="zh-hans">我是李天天，一名视频剪辑师。从帮朋友剪第一支短片开始，到现在为运动、时尚、生活方式品牌做内容，我一直在做同一件事——把散落的素材，剪成一段有呼吸的故事。</span>
-      <span data-lang="zh-hant">我是李天天，一名視頻剪輯師。從幫朋友剪第一支短片開始，到現在為運動、時尚、生活方式品牌做內容，我一直在做同一件事——把散落的素材，剪成一段有呼吸的故事。</span>
-      <span data-lang="en">I'm Triston Li, a video editor. From cutting a short film for a friend to making content for sports, fashion and lifestyle brands, I've been doing the same thing all along — turning scattered footage into a story that breathes.</span>
+      <span data-lang="zh-hans">我是 李天天，一名来自广州的独立视频剪辑师与视觉创作者。</span>
+      <span data-lang="en">I'm Triston, an independent film editor and visual creative based in Guangzhou, China.</span>
     </p>
     <p>
-      <span data-lang="zh-hans">我在意节奏。一个镜头多停留半秒，情绪就完全不同。所以我很少一次剪完就交片，通常会放两天，再回来重新听一遍它的呼吸。</span>
-      <span data-lang="zh-hant">我在意節奏。一個鏡頭多停留半秒，情緒就完全不同。所以我很少一次剪完就交片，通常會放兩天，再回來重新聽一遍它的呼吸。</span>
-      <span data-lang="en">I care about rhythm. Half a second longer on a shot changes everything about how it feels. So I rarely deliver a first cut — I let it sit for a couple of days, then come back and listen to it again.</span>
+      <span data-lang="zh-hans">我的工作涉及时尚影像、商业广告与品牌内容。从品牌内部到制作团队，我与不同领域的创作者合作，在不同类型的项目中探索影像、节奏与叙事之间的关系。</span>
+      <span data-lang="en">My work spans fashion films, commercials and branded content. Over the years, I've worked across both brand-side and production environments, collaborating with different creatives and exploring the relationship between images, rhythm and storytelling.</span>
     </p>
     <p>
-      <span data-lang="zh-hans">如果你有一个项目，不确定该怎么讲，欢迎找我聊聊。我喜欢在剪辑之前，先弄明白它到底想说什么。</span>
-      <span data-lang="zh-hant">如果你有一個項目，不確定該怎麼講，歡迎找我聊聊。我喜歡在剪輯之前，先弄明白它到底想說什麼。</span>
-      <span data-lang="en">If you have a project and aren't sure how to tell it, let's talk. I like to understand what a piece is trying to say before I start cutting.</span>
+      <span data-lang="zh-hans">我相信，剪辑不仅仅是将素材组合在一起。它更像是在寻找一种节奏，塑造情绪，并建立影像与观众之间的联系。</span>
+      <span data-lang="en">I believe editing is more than putting footage together. It's about finding the rhythm, shaping emotions and creating a connection between images and the audience.</span>
+    </p>
+    <p>
+      <span data-lang="zh-hans">在时间线上之外，我也对视觉文化、音乐、艺术，以及我们感知影像的不同方式保持好奇。</span>
+      <span data-lang="en">Beyond the timeline, I'm interested in visual culture, music, art and the many ways we experience images.</span>
+    </p>
+    <p>
+      <span data-lang="zh-hans">持续探索，持续创作。</span>
+      <span data-lang="en">Always curious. Always exploring.</span>
+    </p>
+    <p>
+      <span data-lang="zh-hans">期待新的合作与创作可能。</span>
+      <span data-lang="en">Open to collaborations and new creative possibilities.</span>
     </p>
   </div>
 </section>
@@ -764,28 +790,26 @@
     <div>
       <p class="contact-eyebrow" data-reveal>
         <span data-lang="zh-hans">联系我</span>
-        <span data-lang="zh-hant">聯絡我</span>
-        <span data-lang="en">Get In Touch</span>
+        <span data-lang="en">Contact</span>
       </p>
       <h2 class="contact-headline" data-reveal>
         <span data-lang="zh-hans">有项目想聊？<br><em>随时欢迎。</em></span>
-        <span data-lang="zh-hant">有項目想聊？<br><em>隨時歡迎。</em></span>
-        <span data-lang="en">Have a project?<br><em>Let's talk.</em></span>
+        <span data-lang="en">Let's create<br><em>something together.</em></span>
       </h2>
     </div>
     <div class="contact-links">
       <!-- 微信号没有可跳转的地址，所以这行不是链接，也不带箭头 -->
       <div class="contact-row" data-reveal>
-        <span class="contact-platform"><span data-lang="zh-hans">微信</span><span data-lang="zh-hant">微信</span><span data-lang="en">WeChat</span></span>
+        <span class="contact-platform"><span data-lang="zh-hans">微信</span><span data-lang="en">WeChat</span></span>
         <span class="contact-value">triston2018</span>
       </div>
       <a href="mailto:tientienli@outlook.com" class="contact-row" data-reveal>
-        <span class="contact-platform"><span data-lang="zh-hans">邮箱</span><span data-lang="zh-hant">電郵</span><span data-lang="en">Email</span></span>
+        <span class="contact-platform"><span data-lang="zh-hans">邮箱</span><span data-lang="en">Email</span></span>
         <span class="contact-value">tientienli@outlook.com</span>
       </a>
       <a href="https://www.xiaohongshu.com/user/profile/5fa14dbe0000000001008c3b"
          class="contact-row" target="_blank" rel="noopener noreferrer" data-reveal>
-        <span class="contact-platform"><span data-lang="zh-hans">小红书</span><span data-lang="zh-hant">小紅書</span><span data-lang="en">Rednote</span></span>
+        <span class="contact-platform"><span data-lang="zh-hans">小红书</span><span data-lang="en">Rednote</span></span>
         <span class="contact-value">Triston</span>
       </a>
     </div>
@@ -796,7 +820,6 @@
   <span>© 2025 Triston Li · 李天天</span>
   <span>
     <span data-lang="zh-hans">视频剪辑师</span>
-    <span data-lang="zh-hant">視頻剪輯師</span>
     <span data-lang="en">Video Editor</span>
   </span>
 </footer>
@@ -1109,7 +1132,7 @@
 
   function workCardHTML(w, idx) {
     const langSpans = arr =>
-      `<span data-lang="zh-hans">${arr[0]}</span><span data-lang="zh-hant">${arr[1]}</span><span data-lang="en">${arr[2]}</span>`;
+      `<span data-lang="zh-hans">${arr[0]}</span><span data-lang="en">${arr[2]}</span>`;
     const thumb = w.poster
       ? `<img class="thumb-img" src="${w.poster}" alt="" loading="lazy">`
       : `<div class="thumb-fill" style="background:${w.color};"></div>`;
@@ -1452,15 +1475,15 @@
   });
 
   /* ── LANG ── EN is the default landing language (root path);
-     zh-hans / zh-hant are addressed via ?lang= so links survive reload & sharing */
+     zh-hans is addressed via ?lang= so links survive reload & sharing */
   (function initLang() {
     const params = new URLSearchParams(location.search);
     let lang = params.get('lang');
-    if (lang !== 'zh-hans' && lang !== 'zh-hant') lang = 'en';
+    if (lang !== 'zh-hans') lang = 'en';
 
-    document.body.classList.remove('lang-en', 'lang-zh-hans', 'lang-zh-hant');
+    document.body.classList.remove('lang-en', 'lang-zh-hans');
     document.body.classList.add('lang-' + lang);
-    document.documentElement.lang = lang === 'en' ? 'en' : lang === 'zh-hans' ? 'zh-Hans' : 'zh-Hant';
+    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hans';
 
     const sw = document.getElementById('langSwitch');
     sw.querySelectorAll('.lang-item').forEach(a =>
