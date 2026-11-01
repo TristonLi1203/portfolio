@@ -187,14 +187,21 @@
       width: 100%; height: 100%;
       object-fit: cover; display: block;
     }
-    .card-1 { width: 34vw; aspect-ratio: 16/9; }
-    .card-2 { width: 38vw; aspect-ratio: 16/9; }
-    .card-3 { width: 28vw; aspect-ratio: 16/9; }
-    .card-4 { width: 16vw; aspect-ratio: 9/16; }
+    /* z-index 必须和 CARD_POS 的深度顺序一致。
+       .hero-cards 是 transform-style: flat，浏览器不会按 z 做深度排序，
+       只按堆叠顺序绘制——不写 z-index 的话 DOM 里最后的 card-4（最远那张）
+       会画在最上面，遮挡关系整个是反的。
+       （深度顺序全程不交叉，已逐点验证，所以静态值就够用。） */
+    .card-1 { width: 34vw; aspect-ratio: 16/9;  z-index: 4; }   /* 最近 */
+    .card-2 { width: 38vw; aspect-ratio: 16/9;  z-index: 3; }
+    .card-3 { width: 28vw; aspect-ratio: 16/9;  z-index: 2; }
+    .card-4 { width: 16vw; aspect-ratio: 9/16;  z-index: 1; }   /* 最远 */
 
     /* 图层提升只在动画激活期间生效：Hero 滚过后 7 个图层立即释放显存。
        规则 6 — use will-change temporarily and surgically */
     .hero-stage.is-animating .card       { will-change: transform, filter; }
+    /* 常驻微动期间卡片还在逐帧写 translate（与 transform 是两个独立变换） */
+    .hero-stage.is-drifting  .card       { will-change: transform, translate; }
     .hero-stage.is-animating .hero-veil  { will-change: opacity; }
     .hero-stage.is-animating .vinyl-wrap { will-change: transform; }
     .hero-stage.is-animating .vinyl-disc { will-change: transform; }
@@ -832,16 +839,22 @@
   const PERSPECTIVE = 900;    // must match .hero-cards CSS perspective
   const depthComp = d => (PERSPECTIVE + Math.abs(d * UNIT)) / PERSPECTIVE;
 
-  /* start COMPACT around the center. Phase B is a PURE z-axis dolly —
-     no lateral retargeting: as each card nears the camera, perspective
-     alone enlarges it and pushes its projection outward, which reads as
-     true depth (the 13-Jul tunnel feel). Cards fade out one by one in
-     depth order as they pass the camera. */
+  /* 构图刻意不对称、不等距、允许重叠——重叠是读出深度的主要线索。
+     参考站分析原文说平面是 "scattered, not centered"、Z 间隔 10–15 不等，
+     之前移植时被规整成了对称四宫格 + 精确等距 14，那正是"死板"的来源。
+
+     sway = 横向视差系数，正负混合让图层反向漂移（分析里说这能 multiply
+            the sense of depth）。实际屏幕位移 = sway × MOTION.hero.sway。
+     rush = Phase B 的速度倍率，打破四张卡的锁步。
+     lag  = Phase B 的起跑延迟，让它们不是同一瞬间出发。
+
+     ⚠ rush/lag 必须保证退场顺序仍是由近及远（近的先掠过），
+       否则远的卡会"穿过"近的卡。改完用 E 摆位模式对一下。 */
   const CARD_POS = [
-    { x:  0.12, y: -0.11, depth: -16 },   // nearest — passes first
-    { x: -0.13, y: -0.12, depth: -30 },
-    { x:  0.10, y:  0.13, depth: -44 },
-    { x: -0.12, y:  0.12, depth: -58 },   // farthest
+    { x:  0.17, y: -0.08, depth: -16, sway:  2.4, rush: 1.00, lag:  0    },  // nearest — passes first
+    { x: -0.14, y:  0.06, depth: -28, sway: -1.6, rush: 0.92, lag:  0.02 },
+    { x:  0.06, y:  0.19, depth: -43, sway:  1.1, rush: 1.06, lag: -0.01 },
+    { x: -0.21, y: -0.22, depth: -60, sway: -2.0, rush: 1.02, lag:  0.01 },  // farthest
   ];
 
   function layoutCards() {
@@ -898,18 +911,39 @@
     const EXIT_Z = 550;                                        // past the camera
     const SPEED = (EXIT_Z - CARD_POS[0].depth * UNIT) / 0.42;  // px per timeline unit
     cards.forEach((card, i) => {
-      const travel = EXIT_Z - CARD_POS[i].depth * UNIT;
-      const dur = travel / SPEED;
+      const p = CARD_POS[i];
+      const travel = EXIT_Z - p.depth * UNIT;
+      const dur = travel / (SPEED * p.rush);   /* rush 打破锁步：四张卡不再同速 */
+      const at = 0.58 + p.lag;                 /* lag 让它们不同时起跑 */
       heroTl.to(card, {
         z: EXIT_Z,
         ease: 'power1.in',
         duration: dur,
-      }, 0.58);
+      }, at);
       heroTl.to(card, {
         opacity: 0,
         ease: 'power1.out',
         duration: 0.12,
-      }, 0.58 + dur - 0.12);
+      }, at + dur - 0.12);
+    });
+
+    /* ── 横向视差（sway）──
+       贯穿整条时间线，和 z 推进是两个独立属性，GSAP 分别补间。
+       sway 是屏幕像素，乘 f 换算回卡片的本地坐标系
+       （本地位移经透视除以 f 才投影成屏幕位移）。 */
+    const TL_END = Math.max(...CARD_POS.map(p =>
+      0.58 + p.lag + (EXIT_Z - p.depth * UNIT) / (SPEED * p.rush)));
+    const SWAY = Motion.CONFIG.hero.sway;
+    const VW = window.innerWidth;
+    cards.forEach((card, i) => {
+      const p = CARD_POS[i];
+      if (!p.sway) return;
+      const f = depthComp(p.depth);
+      heroTl.to(card, {
+        x: VW * p.x * f + p.sway * SWAY * f,
+        ease: 'none',
+        duration: TL_END,
+      }, 0);
     });
 
     return heroTl;
@@ -930,7 +964,7 @@
       start: 'top top',
       end: '+=300%',
       pin: true,
-      scrub: 1.2,
+      scrub: Motion.CONFIG.hero.scrub,
       animation: initHero(),
       /* .is-animating gates both layer promotion and the looping cue:
          off the hero, neither costs anything */
@@ -956,6 +990,90 @@
   }
 
   createHeroTriggers();
+
+  /* ── HERO 常驻微动 + 鼠标视差 ──
+     这是"不碰也在动"的那一层。关键在于属性分工：
+     GSAP 占着 transform（滚动驱动的 x/y/z/scale），这个循环只写
+     CSS 的 translate 属性——两者是独立的变换，由浏览器先后相乘，
+     谁也不会覆盖谁，所以不用包一层 wrapper 也不用抢 transform。
+
+     规则 1/4：rAF 有停止条件，离屏和切后台都停。 */
+  const heroAmbient = (function initHeroAmbient() {
+    const noop = { start() {}, stop() {} };
+    if (Motion.reduced) return noop;
+
+    const cfg = Motion.CONFIG.hero;
+    if (!cfg.drift.amp && !cfg.mouse.gain) return noop;
+
+    /* 每张卡一组互不通约的频率，否则几秒后会同步成整体摆动 */
+    const P = CARD_POS.map((p, i) => ({
+      ampX: (5.5 - i * 0.7) * cfg.drift.amp,
+      ampY: (3.8 - i * 0.5) * cfg.drift.amp,
+      fx: (0.21 + i * 0.047) * cfg.drift.speed,
+      fy: (0.17 + i * 0.039) * cfg.drift.speed,
+      ph: i * 2.1,
+      /* 近的卡在屏幕上位移更大——1/f 正是透视下的位移衰减 */
+      mg: cfg.mouse.gain / depthComp(p.depth),
+    }));
+
+    let mx = 0, my = 0, tmx = 0, tmy = 0;
+    if (Motion.canHover) {
+      heroStageEl.addEventListener('mousemove', e => {
+        tmx = (e.clientX / window.innerWidth - 0.5) * 2;
+        tmy = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+      heroStageEl.addEventListener('mouseleave', () => { tmx = 0; tmy = 0; });
+    }
+
+    let rafId = 0, running = false, lastT = 0, paused = false;
+
+    function start() {
+      if (running || paused) return;
+      running = true; lastT = 0;
+      heroStageEl.classList.add('is-drifting');
+      rafId = requestAnimationFrame(tick);
+    }
+    function stop() {
+      if (!running) return;
+      running = false; lastT = 0;
+      cancelAnimationFrame(rafId);
+      heroStageEl.classList.remove('is-drifting');
+      cards.forEach(c => c.style.removeProperty('translate'));
+    }
+
+    new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()),
+      { rootMargin: '100px' }).observe(heroStageEl);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else if (heroStageEl.getBoundingClientRect().bottom > -100) start();
+    });
+
+    function tick(now) {
+      if (!running) return;
+      const dt = lastT ? now - lastT : 16.67;
+      lastT = now;
+      const k = Motion.lerpFactor(cfg.mouse.lerp, dt);
+      mx += (tmx - mx) * k;
+      my += (tmy - my) * k;
+
+      const t = now / 1000;
+      for (let i = 0; i < cards.length; i++) {
+        const q = P[i];
+        /* 鼠标取负：光标向右，场景向左，读起来才像镜头在平移 */
+        const dx = Math.sin(t * q.fx + q.ph)       * q.ampX - mx * q.mg;
+        const dy = Math.cos(t * q.fy + q.ph * 1.3) * q.ampY - my * q.mg * 0.6;
+        cards[i].style.translate = dx.toFixed(2) + 'px ' + dy.toFixed(2) + 'px';
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    /* 摆位模式要精确拖拽，不能让卡片自己飘 */
+    return {
+      start() { paused = false; start(); },
+      stop()  { paused = true;  stop();  },
+    };
+  })();
 
   /* ── WORK GRID · staggered columns + scroll reveal ── */
   const WORKS = [
@@ -1217,7 +1335,11 @@
     document.getElementById('hudValues').textContent =
       'const CARD_POS = [\n' +
       CARD_POS.map(p =>
-        `  { x: ${p.x.toFixed(2).padStart(5)}, y: ${p.y.toFixed(2).padStart(5)} },`
+        `  { x: ${p.x.toFixed(2).padStart(5)}, y: ${p.y.toFixed(2).padStart(5)}` +
+        `, depth: ${String(p.depth).padStart(4)}` +
+        `, sway: ${p.sway.toFixed(1).padStart(4)}` +
+        `, rush: ${p.rush.toFixed(2)}` +
+        `, lag: ${p.lag.toFixed(2).padStart(5)} },`
       ).join('\n') +
       '\n];';
   }
@@ -1231,6 +1353,7 @@
 
   function enterEditMode() {
     editMode = true;
+    heroAmbient.stop();           /* 要精确拖拽，先让卡片别飘 */
     lenis.scrollTo(0, { immediate: true });
     lenis.stop();
     ScrollTrigger.getAll().forEach(t => t.kill());
@@ -1252,6 +1375,7 @@
     lenis.start();
     createHeroTriggers();
     ScrollTrigger.refresh();
+    heroAmbient.start();
   }
 
   document.addEventListener('keydown', e => {
