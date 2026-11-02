@@ -503,7 +503,6 @@
     .work-info { padding: 14px 0 4px; }
     .work-info-badge { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 4px; }
     .work-info-title { font-size: 14px; font-weight: 400; color: var(--ink); margin-bottom: 4px; }
-    .work-info-meta { font-size: 12px; color: var(--ink-light); }
 
     /* ── ABOUT ME ── */
     .about-section {
@@ -684,7 +683,7 @@
 
   <!-- Corner texts -->
   <h1 class="hero-corner-title hero-corner-fade">
-    <span data-lang="zh-hans">与品牌共同生长</span>
+    <span data-lang="zh-hans">持续影像的创作。</span>
     <span data-lang="en">A Practice in Moving Images.</span>
   </h1>
   <div class="hero-corner-scroll hero-corner-fade">
@@ -758,7 +757,7 @@
 
   <div class="about-prose">
     <p>
-      <span data-lang="zh-hans">我是 李天天，一名来自广州的独立视频剪辑师与视觉创作者。</span>
+      <span data-lang="zh-hans">我是李天天，一名来自广州的独立视频剪辑师与视觉创作者。</span>
       <span data-lang="en">I'm Triston, an independent film editor and visual creative based in Guangzhou, China.</span>
     </p>
     <p>
@@ -793,7 +792,7 @@
         <span data-lang="en">Contact</span>
       </p>
       <h2 class="contact-headline" data-reveal>
-        <span data-lang="zh-hans">有项目想聊？<br><em>随时欢迎。</em></span>
+        <span data-lang="zh-hans">我们一起，<br><em>创作点什么。</em></span>
         <span data-lang="en">Let's create<br><em>something together.</em></span>
       </h2>
     </div>
@@ -1099,43 +1098,58 @@
   })();
 
   /* ── WORK GRID · staggered columns + scroll reveal ── */
+  /* 每条作品：badge/title 是 [简体, 英文] 两份；
+     poster 没有就退回 color 色块。想加新作品照着往下抄一条即可。 */
   const WORKS = [
-    { badge: ['时尚 · TVC','時尚 · TVC','Fashion · TVC'],
-      title: ['某时尚品牌春季形象片','某時尚品牌春季形象片','Fashion Brand Spring Campaign'],
-      year: '2024', client: 'Brand A', color: '#E2DDD6' },
-    { badge: ['运动 · 品牌片','運動 · 品牌片','Sport · Brand Film'],
-      title: ['特步 × 中国霹雳舞国家队','特步 × 中國霹靂舞國家隊','XTEP × China Breaking National Team'],
-      year: '2024', client: 'XTEP 特步', color: '#D8DCE0',
+    { badge: ['时尚', 'Fashion'],
+      title: ['Molsion Blokette Series', 'Molsion Blokette Series'],
+      poster: 'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/cover/Molsion24FW%20BLOKETTE%20.jpg',
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/Molsion24FW%20BLOKETTE%20DIR.mp4' },
+
+    { badge: ['童装', 'Kidswear'],
+      title: ['FILA KIDS 猫冬羽绒', 'FILA KIDS Winter Down'],
+      poster: 'covers/fila-kids.jpg',
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/FILA%20KIDS%20%E7%8C%AB%E5%86%AC%E7%BE%BD%E7%BB%92%2016%E6%AF%949.mp4' },
+
+    { badge: ['运动', 'Sport'],
+      title: ['LI-NING CNY 柿柿如意', 'LI-NING Chinese New Year'],
+      poster: 'covers/lining-cny.jpg',
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/LI-NING%E6%9C%88%E7%99%BD%20CNY%E6%9F%BF%E6%9F%BF%E5%A6%82%E6%84%8F%204k.mp4' },
+
+    { badge: ['时尚', 'Fashion'],
+      title: ['思加图 春季经典高跟鞋', 'STACCATO Spring Classic Heels'],
+      poster: 'covers/staccato-heels.jpg',
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/%E6%80%9D%E5%8A%A0%E5%9B%BE24%E6%98%A5%E5%AD%A3%20%E7%BB%8F%E5%85%B8%E9%AB%98%E8%B7%9F%E9%9E%8B%E7%B3%BB%E5%88%97.mp4' },
+
+    { badge: ['时尚', 'Fashion'],
+      title: ['思加图 秋季玛丽珍', 'STACCATO Autumn Mary Jane'],
+      poster: 'covers/staccato-maryjane.jpg',
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/%E6%80%9D%E5%8A%A0%E5%9B%BE24%E7%A7%8B-%E7%8E%9B%E4%B8%BD%E7%8F%8D%E7%B3%BB%E5%88%97.mp4' },
+
+    { badge: ['时尚', 'Fashion'],
+      title: ['思加图 品质乐福鞋', 'STACCATO Loafers'],
+      poster: 'covers/staccato-loafer.jpg',
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/%E6%80%9D%E5%8A%A0%E5%9B%BE%20%E5%93%81%E8%B4%A8%E4%B9%90%E7%A6%8F%20dir.mp4' },
+
+    { badge: ['户外运动', 'Outdoor'],
+      title: ['写生 硬壳冲锋衣', 'Xiesheng Hard-Shell Jacket'],
+      poster: 'covers/xiesheng-shell.jpg',
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/%E5%86%99%E7%94%9F24AW%20FASHION%20FILM%28%E7%A1%AC%E5%A3%B3%29%E5%AF%BC%E6%BC%94%E7%89%88.mp4' },
+
+    { badge: ['运动', 'Sport'],
+      title: ['特步 × 中国霹雳舞国家队', 'XTEP × China Breaking National Team'],
       poster: 'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/cover/%E7%89%B9%E6%AD%A5x%E4%B8%AD%E5%9B%BD%E9%9C%B9%E9%9B%B3%E8%88%9E%E5%9B%BD%E5%AE%B6%E9%98%9F%EF%BC%88Dir%EF%BC%89%204%3A3-0001.png',
-      video: 'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/%E7%89%B9%E6%AD%A5x%E4%B8%AD%E5%9B%BD%E9%9C%B9%E9%9B%B3%E8%88%9E%E5%9B%BD%E5%AE%B6%E9%98%9F.mp4' },
-    { badge: ['新媒体 · 小红书','新媒體 · 小紅書','Digital · Xiaohongshu'],
-      title: ['品牌系列短视频','品牌系列短視頻','Brand Short-form Series'],
-      year: '2024', client: 'Brand C', color: '#DDE0DC' },
-    { badge: ['纪录片 · 人物','紀錄片 · 人物','Documentary · Portrait'],
-      title: ['人物纪录短片','人物紀錄短片','Portrait Documentary'],
-      year: '2023', client: 'Brand D', color: '#E0DDD9' },
-    { badge: ['活动 · 现场','活動 · 現場','Event · Live'],
-      title: ['品牌发布活动现场剪辑','品牌發佈活動現場剪輯','Brand Launch Event Edit'],
-      year: '2023', client: 'Brand E', color: '#DCDCE0' },
-    { badge: ['时尚 · 品牌故事','時尚 · 品牌故事','Fashion · Brand Story'],
-      title: ['品牌周年故事片','品牌週年故事片','Brand Anniversary Film'],
-      year: '2023', client: 'Brand F', color: '#E8E4E0' },
-    { badge: ['新媒体 · 抖音','新媒體 · 抖音','Digital · Douyin'],
-      title: ['抖音品牌植入短片','抖音品牌植入短片','Douyin Brand Integration'],
-      year: '2024', client: 'Brand C', color: '#D9DEE2' },
-    { badge: ['采访 · 人物','採訪 · 人物','Interview · Portrait'],
-      title: ['品牌创始人专访','品牌創始人專訪','Founder Interview'],
-      year: '2022', client: 'Brand D', color: '#E4E0DA' },
+      video:  'https://tristonli-portfolio-video.oss-cn-guangzhou.aliyuncs.com/%E4%BD%9C%E5%93%81/%E7%89%B9%E6%AD%A5x%E4%B8%AD%E5%9B%BD%E9%9C%B9%E9%9B%B3%E8%88%9E%E5%9B%BD%E5%AE%B6%E9%98%9F.mp4' },
   ];
 
   const PLAY_SVG = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2.5L11 7L4 11.5V2.5Z" fill="white"/></svg>';
 
   function workCardHTML(w, idx) {
     const langSpans = arr =>
-      `<span data-lang="zh-hans">${arr[0]}</span><span data-lang="en">${arr[2]}</span>`;
+      `<span data-lang="zh-hans">${arr[0]}</span><span data-lang="en">${arr[1]}</span>`;
     const thumb = w.poster
       ? `<img class="thumb-img" src="${w.poster}" alt="" loading="lazy">`
-      : `<div class="thumb-fill" style="background:${w.color};"></div>`;
+      : `<div class="thumb-fill" style="background:${w.color || '#1a1a1a'};"></div>`;
     return `<div class="work-card" data-idx="${idx}" data-reveal>
       <div class="work-thumb-box">
         ${thumb}
@@ -1144,7 +1158,6 @@
       <div class="work-info">
         <p class="work-info-badge">${langSpans(w.badge)}</p>
         <p class="work-info-title">${langSpans(w.title)}</p>
-        <p class="work-info-meta">${w.year} · ${w.client}</p>
       </div>
     </div>`;
   }
